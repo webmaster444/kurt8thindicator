@@ -140,7 +140,7 @@ d3.json(jsonfileName, function(jsondata) {
   g_indi_start.append('text').attr('x',(x(data[0].date))).attr('y',(y(data[0].close))).attr('dy','.3em').text(data[0].close).attr('text-anchor','middle').attr('fill','white');
   var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
   g_indi_end.append('rect').attr('x',(x(data[data.length-1].date) - 20)).attr('y',(y(data[data.length-1].close)-15)).attr('width',40).attr('height',30).attr('fill',color(4*i+3));
-  g_indi_end.append('text').attr('x',(x(data[data.length-1].date))).attr('y',(y(data[data.length-1].close))).attr('dy','.3em').text(data[0].close).attr('text-anchor','middle').attr('fill','white');
+  g_indi_end.append('text').attr('x',(x(data[data.length-1].date))).attr('y',(y(data[data.length-1].close))).attr('dy','.3em').text(data[data.length-1].close).attr('text-anchor','middle').attr('fill','white');
   } 
 });
 
