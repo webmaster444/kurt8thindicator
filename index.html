@@ -12,13 +12,42 @@
   fill: lightsteelblue;
 }
 
+#city_selector_wrapper, #type_selector_wrapper{
+  display: inline-block;
+  margin: 30px;
+}
+select{
+  padding: 10px 8px;
+  border-radius: 3px;
+  margin-left: 15px;
+}
 </style>
 <body>
-
+<div id="city_selector_wrapper">
+  <label> Select City </label>
+  <select id="city_selector">
+    <option select value="De-Panne">De Panne</option>
+    <option value="Koksijde">Koksijde</option>
+    <option value="Nieuwpoort">Nieuwpoort</option>
+    <option value="Veurne">Veurne</option>
+  </select>
+</div>
+<div id="type_selector_wrapper">
+  <label> Select Type </label>
+  <select id="type_selector">
+    <option select value="Huizen in gesloten bebouwing">Huizen in gesloten bebouwing</option>
+    <option value="Huizen in halfopen bebouwing">Huizen in halfopen bebouwing</option>
+    <option value="Huizen in open bebouwing, hoeven en kastelen">Huizen in open bebouwing, hoeven en kastelen</option>
+    <option value="Buildings en flatgebouwen met appartementen">Buildings en flatgebouwen met appartementen</option>
+  </select>
+</div>
+<div id="chart1"></div>
 <!-- load the d3.js library -->     
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
+function drawChart(){
 // set the dimensions and margins of the graph
 var margin = {top: 80, right: 20, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
@@ -45,7 +74,7 @@ var valueline = d3.line()
 // append the svg obgect to the body of the page
 // appends a 'group' element to 'svg'
 // moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#chart1").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -54,8 +83,11 @@ var svg = d3.select("body").append("svg")
 
 // get the data
 // d3.csv("data.csv", function(error, data) {
-d3.json("De-Panne2.json", function(data) {
-  var data = data["Huizen in gesloten bebouwing"];
+var jsonfileName = jQuery("#city_selector").val();
+jsonfileName += "2.json";
+d3.json(jsonfileName, function(data) {
+  var tmpKey = jQuery('#type_selector').val();
+  var data = data[tmpKey];
   // if (error) throw error;
   // Object.keys(data).forEach(function(d){
   //   console.log(data[d]);
@@ -97,10 +129,23 @@ d3.json("De-Panne2.json", function(data) {
   svg.append("g")
       .call(d3.axisLeft(y));
 
-  svg.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text("De-Panne");
-  svg.append("text").attr('x',0).attr('y',-30).attr('dy','.3em').text("Huizen in gesloten bebouwing / Houses in closed buildings");
+  svg.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(jQuery('#city_selector').val());
+  svg.append("text").attr('x',0).attr('y',-30).attr('dy','.3em').text(jQuery("#type_selector").val());
 
 });
 
+}
+
+$(function(){
+  drawChart();
+  $('#city_selector').change(function(){
+    $("#chart1").empty();
+    drawChart();
+  }) 
+  $('#type_selector').change(function(){
+    $("#chart1").empty();
+    drawChart();
+  })
+})
 </script>
 </body>
