@@ -131,9 +131,15 @@ d3.json(jsonfileName, function(data) {
   svg.append("path")
       .data([newdata])
       .attr("class", "line")
+      .attr("d", valueline)
        .transition()
-      .duration(2500)
-      .attr("d", valueline);
+      .duration(1500)    
+     .attrTween('d',function(){              
+        var interpolator = d3.interpolate(newzerodata,newdata)
+        return function(t){                
+          return valueline(interpolator(t));
+        }
+      });  
     
   // add the X Axis
   svg.append("g").attr('class','x axis')
