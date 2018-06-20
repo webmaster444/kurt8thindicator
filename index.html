@@ -87,11 +87,17 @@ jsonfileName += ".json";
 d3.json(jsonfileName, function(data) {
   var keysArray = Object.keys(data);
   var newdata=[];
+  var newzerodata = [];
   for(var i=0;i<keysArray.length;i++){
-    var tmpData=[];
+    var tmpData={};
     tmpData['key'] = keysArray[i];
     tmpData['value'] = d3.sum(Object.values(data[keysArray[i]]));
     newdata.push(tmpData);
+
+    var zeroData = {};
+    zeroData['date'] = Date.parse(keysArray[i]);
+    zeroData['close'] = 0;
+    newzerodata.push(zeroData);
   }
 
   // format the data
@@ -106,23 +112,19 @@ d3.json(jsonfileName, function(data) {
   x.domain(d3.extent(newdata, function(d) { return d.date; })).nice();
   y.domain([0, d3.max(newdata, function(d) { return d.close; })]).nice();
 
-var newArr  = [3575,3640,3694,3724,3739,3740,3767,3824,3868,3898,3951,3982,4022,4046,4074,4102,4118,4130,4159];
-var zeroArr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];  
-  // add the area
-  console.log(newdata);
-  console.log([newdata]);
+  // add the area  
     svg.append("path")
        .data([newdata])
        .attr("class", "area")
        .attr("d", area)
-      // .transition() 
-      // .duration(2500)
-      //  .attrTween('d',function(){        
-      //   var interpolator = d3.interpolate(0,[newdata])
-      //   return function(t){                
-      //     return area(interpolator(t))
-      //   }
-      // });
+      .transition() 
+      .duration(1500)
+       .attrTween('d',function(){              
+        var interpolator = d3.interpolate(newzerodata,newdata)
+        return function(t){                
+          return area(interpolator(t));
+        }
+      });
 
 
   // add the valueline path.
@@ -142,8 +144,7 @@ var zeroArr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   svg.append("g").attr('class','y axis')
       .call(d3.axisLeft(y).ticks(4));
 
-  svg.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(jQuery('#city_selector').val());
-  svg.append("text").attr('x',0).attr('y',-30).attr('dy','.3em').text(jQuery("#type_selector").val());
+  svg.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(jQuery('#city_selector').val());  
 
 });
 
