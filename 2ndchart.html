@@ -67,11 +67,10 @@ var y = d3.scaleLinear()
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var xAxis = d3.axisBottom()
-    .scale(x);
+    .scale(x).ticks(5);
 
 var yAxis = d3.axisLeft()
-    .scale(y)
-    // .tickFormat(formatBillion);
+    .scale(y).ticks(5);    
 
 var area = d3.area()
     .x(function(d) { 
@@ -105,7 +104,7 @@ d3.json(jsonfileName, function(error, jsondata) {
     }
     data.push(tmp_array);
   }
-  console.log(d3.keys(data[0]));
+  
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== 'date'; }));
 
   var keys = d3.keys(data[0]).filter(function(key) { return key !== 'date'; })

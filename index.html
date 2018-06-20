@@ -12,7 +12,12 @@
   fill: lightsteelblue;
 }
 
-#city_selector_wrapper, #type_selector_wrapper{
+.axis line,
+.axis path.domain{
+  display: none;
+}
+
+#city_selector_wrapper{
   display: inline-block;
   margin: 30px;
 }
@@ -32,15 +37,7 @@ select{
     <option value="Veurne">Veurne</option>
   </select>
 </div>
-<div id="type_selector_wrapper">
-  <label> Select Type </label>
-  <select id="type_selector">
-    <option select value="Huizen in gesloten bebouwing">Huizen in gesloten bebouwing</option>
-    <option value="Huizen in halfopen bebouwing">Huizen in halfopen bebouwing</option>
-    <option value="Huizen in open bebouwing, hoeven en kastelen">Huizen in open bebouwing, hoeven en kastelen</option>
-    <option value="Buildings en flatgebouwen met appartementen">Buildings en flatgebouwen met appartementen</option>
-  </select>
-</div>
+
 <div id="chart1"></div>
 <!-- load the d3.js library -->     
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  crossorigin="anonymous"></script>
@@ -61,15 +58,18 @@ var x = d3.scaleTime().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
 
 // define the area
-var area = d3.area()
+var area = d3.area()    
+    .curve(d3.curveCardinal)
     .x(function(d) { return x(d.date); })
     .y0(height)
     .y1(function(d) { return y(d.close); });
+    
 
 // define the line
 var valueline = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
+    .y(function(d) { return y(d.close); })
+    .curve(d3.curveCardinal);
 
 // append the svg obgect to the body of the page
 // appends a 'group' element to 'svg'
@@ -82,22 +82,20 @@ var svg = d3.select("#chart1").append("svg")
           "translate(" + margin.left + "," + margin.top + ")");
 
 // get the data
-// d3.csv("data.csv", function(error, data) {
 var jsonfileName = jQuery("#city_selector").val();
-jsonfileName += "2.json";
+jsonfileName += ".json";
 d3.json(jsonfileName, function(data) {
-  var tmpKey = jQuery('#type_selector').val();
-  var data = data[tmpKey];
-  // if (error) throw error;
-  // Object.keys(data).forEach(function(d){
-  //   console.log(data[d]);
-  // })
-  data = Object.entries(data).map(([key, value]) => ({key,value}));
-  // const peopleArray = Object.keys(data).map(i => data[i])
-  // console.log(output);
-  console.log(data);
+  var keysArray = Object.keys(data);
+  var newdata=[];
+  for(var i=0;i<keysArray.length;i++){
+    var tmpData=[];
+    tmpData['key'] = keysArray[i];
+    tmpData['value'] = d3.sum(Object.values(data[keysArray[i]]));
+    newdata.push(tmpData);
+  }
+
   // format the data
-  data.forEach(function(d) {
+  newdata.forEach(function(d) {
       d.date = Date.parse(d.key);
       d.close = +d.value;
   });
@@ -105,29 +103,44 @@ d3.json(jsonfileName, function(data) {
   var parseTime = d3.timeParse("%Y");
 
   // scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.date; })).nice();
-  y.domain([0, d3.max(data, function(d) { return d.close; })]).nice();
+  x.domain(d3.extent(newdata, function(d) { return d.date; })).nice();
+  y.domain([0, d3.max(newdata, function(d) { return d.close; })]).nice();
 
+var newArr  = [3575,3640,3694,3724,3739,3740,3767,3824,3868,3898,3951,3982,4022,4046,4074,4102,4118,4130,4159];
+var zeroArr = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];  
   // add the area
+  console.log(newdata);
+  console.log([newdata]);
     svg.append("path")
-       .data([data])
+       .data([newdata])
        .attr("class", "area")
-       .attr("d", area);
+       .attr("d", area)
+      // .transition() 
+      // .duration(2500)
+      //  .attrTween('d',function(){        
+      //   var interpolator = d3.interpolate(0,[newdata])
+      //   return function(t){                
+      //     return area(interpolator(t))
+      //   }
+      // });
+
 
   // add the valueline path.
   svg.append("path")
-      .data([data])
+      .data([newdata])
       .attr("class", "line")
+       .transition()
+      .duration(2500)
       .attr("d", valueline);
-
+    
   // add the X Axis
-  svg.append("g")
+  svg.append("g").attr('class','x axis')
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y")));
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%Y")));
 
   // add the Y Axis
-  svg.append("g")
-      .call(d3.axisLeft(y));
+  svg.append("g").attr('class','y axis')
+      .call(d3.axisLeft(y).ticks(4));
 
   svg.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(jQuery('#city_selector').val());
   svg.append("text").attr('x',0).attr('y',-30).attr('dy','.3em').text(jQuery("#type_selector").val());
@@ -142,10 +155,6 @@ $(function(){
     $("#chart1").empty();
     drawChart();
   }) 
-  $('#type_selector').change(function(){
-    $("#chart1").empty();
-    drawChart();
-  })
 })
 </script>
 </body>

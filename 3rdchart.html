@@ -92,10 +92,7 @@ d3.json(jsonfileName, function(jsondata) {
   for(var i=0;i<keysArray.length;i++){
     var tmpKey = keysArray[i];    
     var data = jsondata[tmpKey];
-  // if (error) throw error;
-  // Object.keys(data).forEach(function(d){
-  //   console.log(data[d]);
-  // })
+    
   data = Object.entries(data).map(([key, value]) => ({key,value}));  
   // format the data
   data.forEach(function(d) {
@@ -131,7 +128,7 @@ d3.json(jsonfileName, function(jsondata) {
 
   // add the Y Axis
   g_wrapper.append("g").attr('class','y axis')
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y).ticks(5));
 
   g_wrapper.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(tmpKey); 
 
