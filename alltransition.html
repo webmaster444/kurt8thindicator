@@ -393,7 +393,15 @@ d3.json(jsonfileName, function(jsondata) {
       .data([data])
       .attr("class", "line")
       .attr('stroke',color(4*i+3))
-      .attr("d", valueline);
+      .attr("d", valueline)
+               .transition()
+        .duration(1500)    
+       .attrTween('d',function(d){              
+          var interpolator = d3.interpolate(zeroData,d)
+          return function(t){                
+            return valueline(interpolator(t));
+          }
+        }); ;
 
   // add the X Axis
   g_wrapper.append("g").attr('class','x axis')
@@ -407,18 +415,40 @@ d3.json(jsonfileName, function(jsondata) {
   // g_wrapper.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(tmpKey); 
 
   var g_indi_start = g_wrapper.append('g').attr('class','indicator_start');
-  g_indi_start.append('rect').attr('x',(x(data[0].date) - 20)).attr('y',(y(data[0].close)-15)).attr('width',40).attr('height',30).attr('fill',color(4*i+3));
+  g_indi_start.append('rect')
+    .attr('class','indi_rect indirect_'+i)
+    .attr('x',(x(data[0].date) - 20))
+    .attr('y',(y(data[0].close)-15))
+    .attr('width',40)
+    .attr('height',30)
+    .attr('fill','white')        
+
   g_indi_start.append('text').attr('x',(x(data[0].date))).attr('y',(y(data[0].close))).attr('dy','.3em').text(data[0].close).attr('text-anchor','middle').attr('fill','white');
-  var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
-  g_indi_end.append('rect').attr('x',(x(data[data.length-1].date) - 20)).attr('y',(y(data[data.length-1].close)-15)).attr('width',40).attr('height',30).attr('fill',color(4*i+3));
+
+  var g_indi_end = g_wrapper.append('g')
+    .attr('class','indicator_end');
+  g_indi_end.append('rect')
+    .attr('class','indi_rect indirect_'+i)
+    .attr('x',(x(data[data.length-1].date) - 20))
+    .attr('y',(y(data[data.length-1].close)-15))
+    .attr('width',40)
+    .attr('height',30)
+    .attr('fill','white');
   g_indi_end.append('text').attr('x',(x(data[data.length-1].date))).attr('y',(y(data[data.length-1].close))).attr('dy','.3em').text(data[data.length-1].close).attr('text-anchor','middle').attr('fill','white');
   } 
+  svg.selectAll('rect.indi_rect')
+    .transition()
+    .style('fill',function(d,i){      
+      var className = d3.select(this).attr('class');
+      var t = className[19];      
+      return color(4*t+3);})
+    .duration(2500)
 });
 
 }
 $(function(){
   drawfirstChart();
-  draw2ndChart();  
+  draw2ndChart();    
   $('#city_selector').change(function(){
     $("#chart1").empty();
     drawfirstChart();
