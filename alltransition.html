@@ -31,7 +31,9 @@ select{
 .hide{
   display: none;
 }
-
+.g_wra_2 .y.axis text,.g_wra_1 .y.axis text,.g_wra_3 .y.axis text{
+  display: none;
+}
 #buttons_wrapper a{
   text-decoration: none;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
@@ -59,7 +61,7 @@ select{
 
 <div id="chart1"></div>
 <div id="chart2" class="hide"></div>
-<div id="chart3" class="hide"></div>
+<div id="chart3"></div>
 <!-- load the d3.js library -->     
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -254,9 +256,7 @@ function draw2ndChart(){
     stack.keys(keys);
 
     stack.order(d3.stackOrderNone);
-    stack.offset(d3.stackOffsetNone);
-
-    console.log(stack(data));
+    stack.offset(d3.stackOffsetNone);  
 
     var browser = svg.selectAll('.browser')
         .data(stack(data))
@@ -339,7 +339,15 @@ var jsonfileName = jQuery("#city_selector").val();
 jsonfileName += "2.json";
 d3.json(jsonfileName, function(jsondata) {
   var keysArray = Object.keys(jsondata);
+  var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({key,value}));  
+  jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({key,value})); 
 
+  jsondataArray.forEach(function(d) {                    
+      d.close = +d3.max(Object.values(d.value.value));
+  });
+  
+  y.domain([0, d3.max(jsondataArray, function(d) { return d.close; })]).nice();
+  
   for(var i=0;i<keysArray.length;i++){
     var tmpKey = keysArray[i];    
     var data = jsondata[tmpKey];
@@ -350,8 +358,9 @@ d3.json(jsonfileName, function(jsondata) {
       d.date = Date.parse(d.key);
       d.close = +d.value;
   });
+  x.domain(d3.extent(data, function(d) { return d.date; })).nice();
 
-var zeroData = [];
+  var zeroData = [];
   data.forEach(function(d){
     var tmpzero = {};
     tmpzero['date'] = Date.parse(d.key);
@@ -362,25 +371,22 @@ var zeroData = [];
   var parseTime = d3.timeParse("%Y");
 
   // scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.date; })).nice();
-  y.domain([0, d3.max(data, function(d) { return d.close; })]).nice();
 
-  var g_wrapper = svg.append('g').attr('class','g_wrapper g_wra_' + i).attr('transform',"translate(" + (i * width/4) + ',0)');  
-  console.log([data]);
+  var g_wrapper = svg.append('g').attr('class','g_wrapper g_wra_' + i).attr('transform',"translate(" + (i * width/4) + ',0)');    
   // add the area
   g_wrapper.append("path")
        .data([data])
        .attr("class", "area")
        .attr('fill',color(4*i+1))
        .attr("d", area)
-      //  .transition() 
-      // .duration(1500)
-      //  .attrTween('d',function(d){                    
-      //   var interpolator = d3.interpolate(zeroData,d)
-      //   return function(t){                
-      //     return area(interpolator(t));
-      //   }
-      // });
+       .transition() 
+        .duration(1500)
+       .attrTween('d',function(d){                    
+        var interpolator = d3.interpolate(zeroData,d)
+        return function(t){                          
+          return area(interpolator(t));
+        }
+      });
 
   // add the valueline path.
   g_wrapper.append("path")
@@ -412,8 +418,7 @@ var zeroData = [];
 }
 $(function(){
   drawfirstChart();
-  draw2ndChart();
-  draw3rdChart();
+  draw2ndChart();  
   $('#city_selector').change(function(){
     $("#chart1").empty();
     drawfirstChart();
@@ -429,9 +434,8 @@ function show2ndchart(){
 }
 
 function show3rdchart(){
-  $("#chart2").hide();  
-  $("#chart3").fadeIn(1000);
-  $("#chart3").removeClass('hide');
+  $("#chart2").hide();    
+  draw3rdChart();
   $('#show3rdchart').css('visibility','hidden');  
 }
 </script>

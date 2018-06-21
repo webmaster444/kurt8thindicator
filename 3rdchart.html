@@ -23,9 +23,9 @@ select{
   shape-rendering: crispEdges;
 }
 
-.g_wra_2 .y.axis text,.g_wra_1 .y.axis text,.g_wra_3 .y.axis text{
+/*.g_wra_2 .y.axis text,.g_wra_1 .y.axis text,.g_wra_3 .y.axis text{
   display: none;
-}
+}*/
 .g_wra_0{
   display: block;
 }
@@ -89,8 +89,9 @@ var jsonfileName = jQuery("#city_selector").val();
 jsonfileName += "2.json";
 d3.json(jsonfileName, function(jsondata) {
   var keysArray = Object.keys(jsondata);
-
-  for(var i=0;i<keysArray.length;i++){
+  var dataArray = [];
+  var dataArray1,dataArray2,dataArray3,dataArray0;
+  for(var i=0;i<keysArray.length;i++){    
     var tmpKey = keysArray[i];    
     var data = jsondata[tmpKey];
     
@@ -109,25 +110,24 @@ var zeroData = [];
     zeroData.push(tmpzero);
   })
 
-console.log(zeroData);
   var parseTime = d3.timeParse("%Y");
 
   // scale the range of the data
   x.domain(d3.extent(data, function(d) { return d.date; })).nice();
   y.domain([0, d3.max(data, function(d) { return d.close; })]).nice();
 
-  var g_wrapper = svg.append('g').attr('class','g_wrapper g_wra_' + i).attr('transform',"translate(" + (i * width/4) + ',0)');  
-  console.log([data]);
+  var g_wrapper = svg.append('g').attr('class','g_wrapper g_wra_' + i).attr('transform',"translate(" + (i * width/4) + ',0)');    
+
   // add the area
   g_wrapper.append("path")
        .data([data])
        .attr("class", "area")
        .attr('fill',color(4*i+1))
        .attr("d", area)
-      //  .transition() 
+       // .transition() 
       // .duration(1500)
-      //  .attrTween('d',function(){                    
-      //   var interpolator = d3.interpolate(zeroData,data)
+      //  .attrTween('d',function(d,i){                       
+      //   var interpolator = d3.interpolate(zeroData,d)
       //   return function(t){                
       //     return area(interpolator(t));
       //   }
