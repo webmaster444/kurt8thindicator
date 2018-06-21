@@ -62,7 +62,7 @@ var x = d3.scaleTime().range([0, (width / 4 - 50)]).nice();
 var y = d3.scaleLinear().range([height, 0]).nice();
 
 // define the area
-var area = d3.area()
+var area = d3.area()    
     .x(function(d) { return x(d.date); })
     .y0(height)
     .y1(function(d) { return y(d.close); });
@@ -70,7 +70,8 @@ var area = d3.area()
 // define the line
 var valueline = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
+    .y(function(d) { return y(d.close); });    
+
 
 // append the svg obgect to the body of the page
 // appends a 'group' element to 'svg'
@@ -93,13 +94,22 @@ d3.json(jsonfileName, function(jsondata) {
     var tmpKey = keysArray[i];    
     var data = jsondata[tmpKey];
     
-  data = Object.entries(data).map(([key, value]) => ({key,value}));  
+  data = Object.entries(data).map(([key, value]) => ({key,value}));    
   // format the data
   data.forEach(function(d) {
       d.date = Date.parse(d.key);
       d.close = +d.value;
   });
 
+var zeroData = [];
+  data.forEach(function(d){
+    var tmpzero = {};
+    tmpzero['date'] = Date.parse(d.key);
+    tmpzero['close'] = 0;
+    zeroData.push(tmpzero);
+  })
+
+console.log(zeroData);
   var parseTime = d3.timeParse("%Y");
 
   // scale the range of the data
@@ -107,12 +117,21 @@ d3.json(jsonfileName, function(jsondata) {
   y.domain([0, d3.max(data, function(d) { return d.close; })]).nice();
 
   var g_wrapper = svg.append('g').attr('class','g_wrapper g_wra_' + i).attr('transform',"translate(" + (i * width/4) + ',0)');  
+  console.log([data]);
   // add the area
   g_wrapper.append("path")
        .data([data])
        .attr("class", "area")
        .attr('fill',color(4*i+1))
-       .attr("d", area);
+       .attr("d", area)
+      //  .transition() 
+      // .duration(1500)
+      //  .attrTween('d',function(){                    
+      //   var interpolator = d3.interpolate(zeroData,data)
+      //   return function(t){                
+      //     return area(interpolator(t));
+      //   }
+      // });
 
   // add the valueline path.
   g_wrapper.append("path")
