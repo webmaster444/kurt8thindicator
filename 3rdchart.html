@@ -130,6 +130,7 @@ var zeroData = [];
       .duration(1500)
        .attrTween('d',function(d,i){     
       console.log(d);
+      console.log(zeroData);
         var interpolator = d3.interpolate(zeroData,d)
         return function(t){                
           return area(interpolator(t));

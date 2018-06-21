@@ -60,7 +60,7 @@ select{
 </div>
 
 <div id="chart1"></div>
-<div id="chart2" class="hide"></div>
+<div id="chart2"></div>
 <div id="chart3"></div>
 <!-- load the d3.js library -->     
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  crossorigin="anonymous"></script>
@@ -209,7 +209,14 @@ function draw2ndChart(){
       .y0(function(d) { return y(d[0]); })
       .y1(function(d) { return y(d[1]); });
 
+var area1 = d3.area()
+    .x(function(d) {              
+      return x(d['date']); })
+    .y0(function(d) { return y(d[0]); })
+    .y1(function(d) { return y(d[1]); });
+
   var stack = d3.stack()
+  var zerostack = d3.stack()
 
   var svg = d3.select('#chart2').append('svg')
       .attr('width', width + margin.left + margin.right)
@@ -258,6 +265,23 @@ function draw2ndChart(){
     stack.order(d3.stackOrderNone);
     stack.offset(d3.stackOffsetNone);  
 
+  zerostack.keys(keys);
+  zerostack.order(d3.stackOrderNone);
+  zerostack.offset(d3.stackOffsetNone);  
+  var zeroArray = [];
+  for(var i=0;i<zerostack(data).length;i++){    
+    var zerosub = [];
+    for(var j=0;j<zerostack(data)[i].length;j++){
+      var tmp_a = {};
+      tmp_a[0] = zerostack(data)[i][j][0];
+      tmp_a[1] = zerostack(data)[i][j][0];      
+      tmp_a['date'] = zerostack(data)[i][j]['data']['date'];
+      zerosub.push(tmp_a);
+    }
+    zeroArray.push(zerosub);
+  }
+    
+
     var browser = svg.selectAll('.browser')
         .data(stack(data))
       .enter().append('g')
@@ -267,7 +291,23 @@ function draw2ndChart(){
     browser.append('path')
         .attr('class', 'area')
         .attr('d', area)
-        .style('fill', function(d) { return color(d.key); });
+        .style('fill', function(d) { return color(d.key); })        
+        .transition() 
+        .duration(1500)
+        .attrTween('d',function(d,i){             
+          var ba=[];
+          for(var j=0;j<d.length;j++){
+            var tmp_a = {};
+            tmp_a[0] = d[j][0];
+            tmp_a[1] = d[j][1];
+            tmp_a['date'] = d[j]['data']['date'];
+            ba.push(tmp_a);
+          }        
+        var interpolator = d3.interpolate(zeroArray[i],ba);              
+        return function(t){                
+          return area1(interpolator(t));
+        }
+        });
         
     browser.append('text')
         .datum(function(d) { return d; })
@@ -447,8 +487,7 @@ d3.json(jsonfileName, function(jsondata) {
 
 }
 $(function(){
-  drawfirstChart();
-  draw2ndChart();    
+  drawfirstChart();  
   $('#city_selector').change(function(){
     $("#chart1").empty();
     drawfirstChart();
@@ -457,8 +496,7 @@ $(function(){
 
 function show2ndchart(){
   $("#chart1").hide();  
-  $("#chart2").fadeIn(1000);
-  $("#chart2").removeClass('hide');
+  draw2ndChart();
   $('#show2ndchart').hide();
   $('#show3rdchart').show();
   $('#city_selector_wrapper').css('visibility','hidden');  

@@ -119,7 +119,11 @@ d3.json(jsonfileName, function(data) {
        .attr("d", area)
       .transition() 
       .duration(1500)
-       .attrTween('d',function(){              
+       .attrTween('d',function(d){              
+       console.log(newdata);
+       console.log(newzerodata);
+       console.log(d);
+
         var interpolator = d3.interpolate(newzerodata,newdata)
         return function(t){                
           return area(interpolator(t));
