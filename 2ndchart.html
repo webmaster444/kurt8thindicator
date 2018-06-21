@@ -55,8 +55,7 @@ var parseDate = d3.timeParse('%Y');
 
 var formatSi = d3.format(".3s");
 
-var formatNumber = d3.format(".1f");
-    // formatBillion = function(x) { return formatNumber(x / 1e9); };
+var formatNumber = d3.format(".1f");    
 
 var x = d3.scaleTime()
     .range([0, width]).nice();
@@ -73,12 +72,13 @@ var yAxis = d3.axisLeft()
     .scale(y).ticks(5);    
 
 var area = d3.area()
-    .x(function(d) { 
+    .x(function(d) {       
       return x(d.data.date); })
     .y0(function(d) { return y(d[0]); })
     .y1(function(d) { return y(d[1]); });
 
 var stack = d3.stack()
+var zerostack = d3.stack()
 
 var svg = d3.select('#chart1').append('svg')
     .attr('width', width + margin.left + margin.right)
@@ -86,7 +86,6 @@ var svg = d3.select('#chart1').append('svg')
   .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-// d3.csv('2ndcsv.csv', function(error, data) {
   var jsonfileName = jQuery("#city_selector").val();
 jsonfileName += ".json";
 d3.json(jsonfileName, function(error, jsondata) {
@@ -123,13 +122,27 @@ d3.json(jsonfileName, function(error, jsondata) {
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, maxDateVal])
 
-  stack.keys(keys);
-
+  stack.keys(keys);  
   stack.order(d3.stackOrderNone);
   stack.offset(d3.stackOffsetNone);
-
-  console.log(stack(data));
-
+  
+  zerostack.keys(keys);
+  zerostack.order(d3.stackOrderNone);
+  zerostack.offset(d3.stackOffsetNone);  
+  var zeroArray = [];
+  for(var i=0;i<zerostack(data).length;i++){    
+    var zerosub = [];
+    for(var j=0;j<zerostack(data)[i].length;j++){
+      var tmp_a = [];
+      tmp_a[0] = zerostack(data)[i][j][0];
+      tmp_a[1] = zerostack(data)[i][j][0];
+      tmp_a['data'] = zerostack(data)[i][j]['data'];
+      zerosub.push(tmp_a);
+    }
+    zeroArray.push(zerosub);
+  }
+  
+  var zerostackdata=[];
   var browser = svg.selectAll('.browser')
       .data(stack(data))
     .enter().append('g')
@@ -138,8 +151,18 @@ d3.json(jsonfileName, function(error, jsondata) {
 
   browser.append('path')
       .attr('class', 'area')
-      .attr('d', area)
-      .style('fill', function(d) { return color(d.key); });
+      .attr('d', area)      
+      .style('fill', function(d) { return color(d.key); })
+      .transition() 
+      .duration(1500)
+       .attrTween('d',function(d,i){      
+        console.log(zeroArray[i]);
+        console.log(d);
+        var interpolator = d3.interpolate(zeroArray[i],d)
+        return function(t){                
+          return area(interpolator(t));
+        }
+      });
       
   browser.append('text')
       .datum(function(d) { return d; })

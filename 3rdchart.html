@@ -110,6 +110,8 @@ var zeroData = [];
     zeroData.push(tmpzero);
   })
 
+  console.log(zeroData);
+  console.log(data);
   var parseTime = d3.timeParse("%Y");
 
   // scale the range of the data
@@ -124,14 +126,15 @@ var zeroData = [];
        .attr("class", "area")
        .attr('fill',color(4*i+1))
        .attr("d", area)
-       // .transition() 
-      // .duration(1500)
-      //  .attrTween('d',function(d,i){                       
-      //   var interpolator = d3.interpolate(zeroData,d)
-      //   return function(t){                
-      //     return area(interpolator(t));
-      //   }
-      // });
+       .transition() 
+      .duration(1500)
+       .attrTween('d',function(d,i){     
+      console.log(d);
+        var interpolator = d3.interpolate(zeroData,d)
+        return function(t){                
+          return area(interpolator(t));
+        }
+      });
 
   // add the valueline path.
   g_wrapper.append("path")
