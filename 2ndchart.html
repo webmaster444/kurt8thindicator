@@ -157,11 +157,15 @@ d3.json(jsonfileName, function(error, jsondata) {
 
   browser.append('path')
         .attr('class', 'area')
-        .attr('d', area)      
+        // .attr('d', area)      
         .style('fill', function(d) { return color(d.key); })
         .transition() 
-        .duration(1500)
-        .attrTween('d',function(d,i){             
+        .delay(function(d,i){
+          return i* 1000;
+        })
+        .duration(1000)
+        .attrTween('d',function(d,i){     
+        console.log(i);        
         var ba=[];
         for(var j=0;j<d.length;j++){
           var tmp_a = {};

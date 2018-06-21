@@ -289,11 +289,13 @@ var area1 = d3.area()
         .attr('fill-opacity', 0.5);
 
     browser.append('path')
-        .attr('class', 'area')
-        .attr('d', area)
+        .attr('class', 'area')        
         .style('fill', function(d) { return color(d.key); })        
         .transition() 
-        .duration(1500)
+        .delay(function(d,i){
+          return i* 1000;
+        })
+        .duration(1000)        
         .attrTween('d',function(d,i){             
           var ba=[];
           for(var j=0;j<d.length;j++){
