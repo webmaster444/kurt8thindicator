@@ -747,20 +747,20 @@
                         }
                     })
 
-                browser.append('text')
-                    .datum(function(d) {
-                        return d;
-                    })
-                    .attr('transform', function(d) {
-                        return 'translate(' + (width / 2) + ',' + (y(d[13][1]) + 80) + ')';
-                    })
-                    .attr('x', -6)
-                    .attr('dy', '.35em')
-                    .style("text-anchor", "middle")
-                    .text(function(d) {
-                        return d.key;
-                    })
-                    .attr('fill-opacity', 1);
+                // browser.append('text')
+                //     .datum(function(d) {
+                //         return d;
+                //     })
+                //     .attr('transform', function(d) {
+                //         return 'translate(' + (width / 2) + ',' + (y(d[13][1]) + 80) + ')';
+                //     })
+                //     .attr('x', -6)
+                //     .attr('dy', '.35em')
+                //     .style("text-anchor", "middle")
+                //     .text(function(d) {
+                //         return d.key;
+                //     })
+                //     .attr('fill-opacity', 1);
 
                 });
         }
@@ -845,8 +845,6 @@
                 }
 
                 var main_wrapper = svg.append('g').attr('class','main_wrapper');
-
-
                 // add the X Axis
                 main_wrapper.append("g").attr('class', 'x axis')
                     .attr("transform", "translate(0," + height + ")")
