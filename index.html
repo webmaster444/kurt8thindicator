@@ -112,6 +112,7 @@ d3.json(jsonfileName, function(data) {
   x.domain(d3.extent(newdata, function(d) { return d.date; })).nice();
   y.domain([0, d3.max(newdata, function(d) { return d.close; })]).nice();
 
+  console.log([newdata]);
   // add the area  
     svg.append("path")
        .data([newdata])
