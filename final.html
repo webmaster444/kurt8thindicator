@@ -80,6 +80,9 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script>
+    var browser_0_path, browser_1_path,browser_2_path,browser_3_path;
+    var g_wrap_0_path, g_wrap_1_path,g_wrap_2_path,g_wrap_3_path;
+    var g_wrap_0_tran, g_wrap_1_tran,g_wrap_2_tran,g_wrap_3_tran;
       // set the dimensions and margins of the graph
       var margin = {top: 20,right: 20,bottom: 30,left: 50},
         width = 960 - margin.left - margin.right,
@@ -138,7 +141,7 @@
                 })
                 .curve(d3.curveCardinal);
 
-        function drawfirstChart() {                                  
+        function drawfirstChart() {                                              
             // get the data
             var jsonfileName = jQuery("#city_selector").val();
             jsonfileName += ".json";
@@ -213,6 +216,7 @@
                     .call(d3.axisLeft(y).ticks(4));
 
             });
+            console.log('1st');
         }
 
         function draw2ndChart() {
@@ -314,25 +318,26 @@
                     .style('fill', function(d) {
                         return color(d.key);
                     })
-                    .transition()
-                    .delay(function(d, i) {
-                        return i * 1000;
-                    })
-                    .duration(1000)
-                    .attrTween('d', function(d, i) {
-                        var ba = [];
-                        for (var j = 0; j < d.length; j++) {
-                            var tmp_a = {};
-                            tmp_a[0] = d[j][0];
-                            tmp_a[1] = d[j][1];
-                            tmp_a['date'] = d[j]['data']['date'];
-                            ba.push(tmp_a);
-                        }
-                        var interpolator = d3.interpolate(zeroArray[i], ba);
-                        return function(t) {
-                            return area1(interpolator(t));
-                        }
-                    });
+                    .attr('d',area)
+                    // .transition()
+                    // .delay(function(d, i) {
+                    //     return i * 1000;
+                    // })
+                    // .duration(1000)
+                    // .attrTween('d', function(d, i) {                        
+                    //     var ba = [];
+                    //     for (var j = 0; j < d.length; j++) {
+                    //         var tmp_a = {};
+                    //         tmp_a[0] = d[j][0];
+                    //         tmp_a[1] = d[j][1];
+                    //         tmp_a['date'] = d[j]['data']['date'];
+                    //         ba.push(tmp_a);
+                    //     }
+                    //     var interpolator = d3.interpolate(zeroArray[i], ba);
+                    //     return function(t) {
+                    //         return area1(interpolator(t));
+                    //     }
+                    // })
 
                 browser.append('text')
                     .datum(function(d) {
@@ -506,177 +511,180 @@
             // });
 
             var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
-var z = d3.scaleOrdinal().range(color)
+    var z = d3.scaleOrdinal().range(color)
 
-// parse the date / time
-var parseTime = d3.timeParse("%d-%b-%y");
+    // parse the date / time
+    var parseTime = d3.timeParse("%d-%b-%y");
 
-// set the ranges
-var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.2);
-var x = d3.scaleTime().nice();
+    // set the ranges
+    var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.2);
+    var x = d3.scaleTime().nice();
 
-var y = d3.scaleLinear().range([height, 0]).nice();
+    var y = d3.scaleLinear().range([height, 0]).nice();
 
-// define the area
-var area = d3.area()    
-    .x(function(d) {return x(Date.parse(d.key)); })
-    .y0(height)
-    .y1(function(d) { return y(d.value); });
+    // define the area
+    var area = d3.area()    
+        .x(function(d) {return x(Date.parse(d.key)); })
+        .y0(height)
+        .y1(function(d) { return y(d.value); });
 
-// define the line
-var valueline = d3.line()
-    .x(function(d) {return x(Date.parse(d.key)); })
-    .y(function(d) {return y(d.value); });    
+    // define the line
+    var valueline = d3.line()
+        .x(function(d) {return x(Date.parse(d.key)); })
+        .y(function(d) {return y(d.value); });    
 
 
-// get the data
-// d3.csv("data.csv", function(error, data) {
-var jsonfileName = jQuery("#city_selector").val();
-jsonfileName += "2.json";
-d3.json(jsonfileName, function(jsondata) {
-  var keysArray = Object.keys(jsondata);
+    // get the data
+    // d3.csv("data.csv", function(error, data) {
+    var jsonfileName = jQuery("#city_selector").val();
+    jsonfileName += "2.json";
+    d3.json(jsonfileName, function(jsondata) {
+      var keysArray = Object.keys(jsondata);
 
-  var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
-      key,
-      value
-  }));
-  jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
-      key,
-      value
-  }));
+      var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
+          key,
+          value
+      }));
+      jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
+          key,
+          value
+      }));
 
-  jsondataArray.forEach(function(d) {
-      d.close = +d3.max(Object.values(d.value.value));
-  });
+      jsondataArray.forEach(function(d) {
+          d.close = +d3.max(Object.values(d.value.value));
+      });
 
-  y.domain([0, d3.max(jsondataArray, function(d) {
-      return d.close;
-  })]).nice();
+      y.domain([0, d3.max(jsondataArray, function(d) {
+          return d.close;
+      })]).nice();
 
-  x1.domain(keysArray).padding(0.2);    
-  data = Object.entries(jsondata).map(([key, value]) => ({key,value}));   
-  
-  // format the data
-  data.forEach(function(d) {
-      d.date = Date.parse(d.key);
-      d.close = +d.value;
-  });
+      x1.domain(keysArray).padding(0.2);    
+      data = Object.entries(jsondata).map(([key, value]) => ({key,value}));   
+      
+      // format the data
+      data.forEach(function(d) {
+          d.date = Date.parse(d.key);
+          d.close = +d.value;
+      });
 
-  var zeroData = [];
-  data.forEach(function(d){
-    var tmpzero = {};
-    tmpzero['date'] = Date.parse(d.key);
-    tmpzero['close'] = 0;
-    zeroData.push(tmpzero);
-  })  
-  
-  // scale the range of the data
-  var dateArray = Object.keys(data[0]['value']);
-  var newre = [];
-  dateArray.forEach(function(d,i,dateArray){
-    dateArray = Date.parse(d);    
-  })
-  
-  x.domain(d3.extent(dateArray,function(d){return Date.parse(d)})).rangeRound([0, x1.bandwidth()]);  
-    
-  var g = svg.append('g').attr('class','third_wrapper');
-  
-  var g_wrapper = g.selectAll('g')
-  .data(data).enter()
-  .append('g').attr('class',function(d,i){
-    return 'g_wrapper '+ "g_wrap_"+i;
-  })
-  .attr('transform',function(d,i){return "translate(" + x1(d['key']) + ',0)'});
-
-  g_wrapper.selectAll('path')
-  .data(function(d) {
-    var tmp = [];
-    tmp = d.value;    
-    tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
-    return [tmp]; 
-  }).enter().append("path")
-       .attr("class", "area")       
-       .attr("d", area)
-       .attr("fill",function(d,i){
-        return z(d.key)
-       })
-      //  .transition() 
-      // .duration(1500)
-      //  .attrTween('d',function(d,i){     
-      //   var interpolator = d3.interpolate(zeroData,d)
-      //   return function(t){                
-      //     return area(interpolator(t));
-      //   }
-      // });
-      var arrayData = [];
+      var zeroData = [];
       data.forEach(function(d){
-        var tmp = [];
-        tmp = d.value;
-        tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));     
-        arrayData.push(tmp);
+        var tmpzero = {};
+        tmpzero['date'] = Date.parse(d.key);
+        tmpzero['close'] = 0;
+        zeroData.push(tmpzero);
+      })  
+      
+      // scale the range of the data
+      var dateArray = Object.keys(data[0]['value']);
+      var newre = [];
+      dateArray.forEach(function(d,i,dateArray){
+        dateArray = Date.parse(d);    
       })
-    
-  // add the valueline path.
-  g_wrapper.selectAll('path.line')
+      
+      x.domain(d3.extent(dateArray,function(d){return Date.parse(d)})).rangeRound([0, x1.bandwidth()]);  
+        
+      var g = svg.append('g').attr('class','third_wrapper');
+      
+      var g_wrapper = g.selectAll('g')
+      .data(data).enter()
+      .append('g').attr('class',function(d,i){
+        return 'g_wrapper '+ "g_wrap_"+i;
+      })
+      .attr('transform',function(d,i){return "translate(" + x1(d['key']) + ',0)'});
+
+      g_wrapper.selectAll('path')
       .data(function(d) {
-    var tmp = [];
-    tmp = d.value;    
-    tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
-    return [tmp]; 
-  }).enter().append("path")
-      .attr("class", "line")
-      .attr('stroke',function(d,i){        
-        return z(d.key);
-      })
-      .attr("d", valueline);
+        var tmp = [];
+        tmp = d.value;    
+        tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+        return [tmp]; 
+      }).enter().append("path")
+           .attr("class", "area")       
+           .attr("d", area)
+           .attr("fill",function(d,i){
+            return z(d.key)
+           })
+          //  .transition() 
+          // .duration(1500)
+          //  .attrTween('d',function(d,i){     
+          //   var interpolator = d3.interpolate(zeroData,d)
+          //   return function(t){                
+          //     return area(interpolator(t));
+          //   }
+          // });
+          var arrayData = [];
+          data.forEach(function(d){
+            var tmp = [];
+            tmp = d.value;
+            tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));     
+            arrayData.push(tmp);
+          })
+        
+      // add the valueline path.
+      g_wrapper.selectAll('path.line')
+          .data(function(d) {
+        var tmp = [];
+        tmp = d.value;    
+        tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+        return [tmp]; 
+      }).enter().append("path")
+          .attr("class", "line")
+          .attr('stroke',function(d,i){        
+            return z(d.key);
+          })
+          .attr("d", valueline);
 
-  // // add the X Axis
-  g_wrapper.append("g").attr('class','x axis')
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
+      // // add the X Axis
+      g_wrapper.append("g").attr('class','x axis')
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
 
-  // // add the Y Axis
-  g_wrapper.append("g").attr('class','y axis')
-      .call(d3.axisLeft(y).ticks(5));
+      // // add the Y Axis
+      g_wrapper.append("g").attr('class','y axis')
+          .call(d3.axisLeft(y).ticks(5));
 
-  // g_wrapper.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(tmpKey); 
-  var g_indi_start = g_wrapper.append('g').attr('class','indicator_start');
-  g_indi_start.append('rect')
-  .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))) - 20)})
-  .attr('y',function(d,i){
-    var tmp_key = d3.min(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return (y(tmp_y)-15)})
-  .attr('width',40).attr('height',30);
-
-  g_indi_start.append('text')
-  .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))))})
-  .attr('y',function(d,i){
-    var tmp_key = d3.min(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return (y(tmp_y))})
-  .attr('dy','.3em').text(function(d){
+      // g_wrapper.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(tmpKey); 
+      var g_indi_start = g_wrapper.append('g').attr('class','indicator_start');
+      g_indi_start.append('rect')
+      .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))) - 20)})
+      .attr('y',function(d,i){
         var tmp_key = d3.min(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return tmp_y;
-  }).attr('text-anchor','middle').attr('fill','white');
+        var tmp_y = d['value'][tmp_key];
+        return (y(tmp_y)-15)})
+      .attr('width',40).attr('height',30);
 
-  var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
-  g_indi_end.append('rect').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value))))-20)})
-  .attr('y',function(d,i){
-    var tmp_key = d3.max(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return (y(tmp_y)-15)}).attr('width',40).attr('height',30)
-  g_indi_end.append('text').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value)))))})
-  .attr('y',function(d,i){
-    var tmp_key = d3.max(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return (y(tmp_y))}).attr('dy','.3em').text(function(d){
+      g_indi_start.append('text')
+      .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))))})
+      .attr('y',function(d,i){
+        var tmp_key = d3.min(Object.keys(d.value));    
+        var tmp_y = d['value'][tmp_key];
+        return (y(tmp_y))})
+      .attr('dy','.3em').text(function(d){
+            var tmp_key = d3.min(Object.keys(d.value));    
+        var tmp_y = d['value'][tmp_key];
+        return tmp_y;
+      }).attr('text-anchor','middle').attr('fill','white');
+
+      var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
+      g_indi_end.append('rect').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value))))-20)})
+      .attr('y',function(d,i){
         var tmp_key = d3.max(Object.keys(d.value));    
-    var tmp_y = d['value'][tmp_key];
-    return tmp_y;
-  }).attr('text-anchor','middle').attr('fill','white');
-  // } 
+        var tmp_y = d['value'][tmp_key];
+        return (y(tmp_y)-15)}).attr('width',40).attr('height',30)
+      g_indi_end.append('text').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value)))))})
+      .attr('y',function(d,i){
+        var tmp_key = d3.max(Object.keys(d.value));    
+        var tmp_y = d['value'][tmp_key];
+        return (y(tmp_y))}).attr('dy','.3em').text(function(d){
+            var tmp_key = d3.max(Object.keys(d.value));    
+        var tmp_y = d['value'][tmp_key];
+        return tmp_y;
+      }).attr('text-anchor','middle').attr('fill','white');
+      // } 
+
+      console.log('3rd');    
+      saveVariables();
 });
 
 
@@ -686,6 +694,7 @@ d3.json(jsonfileName, function(jsondata) {
             drawfirstChart();
             draw2ndChart();
             draw3rdChart();
+            // saveVariables();
             // $('#city_selector').change(function() {
             //     $("#chart1").empty();
             //     drawfirstChart();
@@ -693,38 +702,70 @@ d3.json(jsonfileName, function(jsondata) {
         })
 
         function show2ndchart() {            
-          // transition2ndChart();                     
+            console.log(browser_0_path)
+            svg.select('.browser_0').transition().attr("transform","").duration(2000);
+            svg.select('.browser_1').transition().attr("transform","").duration(2000);
+            svg.select('.browser_2').transition().attr("transform","").duration(2000);
+            svg.select('.browser_3').transition().attr("transform","").duration(2000);
+            svg.select('.browser_0 path').transition().attr("d",browser_0_path).duration(2000);
+            svg.select('.browser_1 path').transition().attr("d",browser_1_path).duration(2000);
+            svg.select('.browser_2 path').transition().attr("d",browser_2_path).duration(2000);
+            svg.select('.browser_3 path').transition().attr("d",browser_3_path).duration(2000);
         }
 
         function show3rdchart() {            
-            svg.selectAll('.browser text').remove();
+            svg.selectAll('.browser text').remove();                    
+            
+            svg.select('.browser_0').transition().attr('transform',g_wrap_0_tran).duration(2000);            
+            svg.select('.browser_0 path').transition().attr("d",g_wrap_0_path).duration(2000);
 
-            var path_d = d3.select('.g_wrap_0 path').attr('d');
-            var trans_d = d3.select('.g_wrap_0').attr('transform');
-            svg.select('.browser_0').transition().attr('transform',trans_d).duration(2000);            
-            svg.select('.browser_0 path').transition().attr("d",path_d).duration(2000);
+            svg.select('.browser_1').transition().attr('transform',g_wrap_1_tran).duration(2000);            
+            svg.select('.browser_1 path').transition().attr("d",g_wrap_1_path).duration(2000);
 
-            var path_d = d3.select('.g_wrap_1 path').attr('d');
-            trans_d = d3.select('.g_wrap_1').attr('transform');
+            svg.select('.browser_2').transition().attr('transform',g_wrap_2_tran).duration(2000);            
+            svg.select('.browser_2 path').transition().attr("d",g_wrap_2_path).duration(2000);
 
-            svg.select('.browser_1').transition().attr('transform',trans_d).duration(2000);
-            svg.select('.browser_1 path').transition().attr("d",path_d).duration(2000);
+            svg.select('.browser_3').transition().attr('transform',g_wrap_3_tran).duration(2000);            
+            svg.select('.browser_3 path').transition().attr("d",g_wrap_3_path).duration(2000);
+            // var path_d = d3.select('.g_wrap_1 path').attr('d');
+            // trans_d = d3.select('.g_wrap_1').attr('transform');
 
-            var path_d = d3.select('.g_wrap_2 path').attr('d');
-            trans_d = d3.select('.g_wrap_2').attr('transform');
-            svg.select('.browser_2').transition().attr('transform',trans_d).duration(2000);
-            svg.select('.browser_2 path').transition().attr("d",path_d).duration(2000);
+            // svg.select('.browser_1').transition().attr('transform',trans_d).duration(2000);
+            // svg.select('.browser_1 path').transition().attr("d",path_d).duration(2000);
 
-            var path_d = d3.select('.g_wrap_3 path').attr('d');
-            trans_d = d3.select('.g_wrap_3').attr('transform');
-            svg.select('.browser_3').transition().attr('transform',trans_d).duration(2000);
-            svg.select('.browser_3 path').transition().attr("d",path_d).duration(2000);
+            // var path_d = d3.select('.g_wrap_2 path').attr('d');
+            // trans_d = d3.select('.g_wrap_2').attr('transform');
+            // svg.select('.browser_2').transition().attr('transform',trans_d).duration(2000);
+            // svg.select('.browser_2 path').transition().attr("d",path_d).duration(2000);
+
+            // var path_d = d3.select('.g_wrap_3 path').attr('d');
+            // trans_d = d3.select('.g_wrap_3').attr('transform');
+            // svg.select('.browser_3').transition().attr('transform',trans_d).duration(2000);
+            // svg.select('.browser_3 path').transition().attr("d",path_d).duration(2000);
         }
 
         function show1stchart() {                        
             // transition1stChart();            
         }
 
+        function saveVariables(){      
+        console.log('saveVariables');
+            g_wrap_0_path = d3.select('.g_wrap_0 path').attr('d');
+            g_wrap_1_path = d3.select('.g_wrap_1 path').attr('d');
+            g_wrap_2_path = d3.select('.g_wrap_2 path').attr('d');
+            g_wrap_3_path = d3.select('.g_wrap_3 path').attr('d');
+
+            g_wrap_0_tran = d3.select('.g_wrap_0').attr('transform');
+            g_wrap_1_tran = d3.select('.g_wrap_1').attr('transform');
+            g_wrap_2_tran = d3.select('.g_wrap_2').attr('transform');
+            g_wrap_3_tran = d3.select('.g_wrap_3').attr('transform');
+
+            console.log(d3.select('.browser_0 path').attr('d'));
+            browser_0_path = d3.select('.browser_0 path').attr('d');
+            browser_1_path = d3.select('.browser_1 path').attr('d');
+            browser_2_path = d3.select('.browser_2 path').attr('d');
+            browser_3_path = d3.select('.browser_3 path').attr('d');
+        }
         // function transition2ndChart(){
 
         // }
