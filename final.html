@@ -94,7 +94,7 @@
     <!-- load the d3.js library -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script>
+    <script>    
     var browser_0_path, browser_1_path,browser_2_path,browser_3_path;
     var g_wrap_0_path, g_wrap_1_path,g_wrap_2_path,g_wrap_3_path;
     var g_wrap_0_tran, g_wrap_1_tran,g_wrap_2_tran,g_wrap_3_tran;
@@ -200,14 +200,6 @@
                     .data([newdata])
                     .attr("class", "area")
                     .attr("d", firstchartarea)
-                    .transition()
-                    .duration(1500)
-                    .attrTween('d', function() {
-                        var interpolator = d3.interpolate(newzerodata, newdata)
-                        return function(t) {
-                            return firstchartarea(interpolator(t));
-                        }
-                    });
             
                 zData = newzerodata;
                 // add the valueline path.
@@ -215,14 +207,6 @@
                     .data([newdata])
                     .attr("class", "line")
                     .attr("d", valueline)
-                    .transition()
-                    .duration(1500)
-                    .attrTween('d', function() {
-                        var interpolator = d3.interpolate(newzerodata, newdata)
-                        return function(t) {
-                            return valueline(interpolator(t));
-                        }
-                    });
 
                 // add the X Axis
                 first_wrapper.append("g").attr('class', 'x axis')
@@ -232,6 +216,8 @@
                 // add the Y Axis
                 first_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(4));
+
+                draw2ndChart();
 
             });
             
@@ -331,31 +317,9 @@
                     .style('fill', function(d) {
                         return color(d.key);
                     })
-                    .attr('d',area)
+                    .attr('d',area)    
 
-                browser.append('text')
-                    .datum(function(d) {
-                        return d;
-                    })
-                    .attr('transform', function(d) {
-                        return 'translate(' + (width / 2) + ',' + (y(d[13][1]) + 80) + ')';
-                    })
-                    .attr('x', -6)
-                    .attr('dy', '.35em')
-                    .style("text-anchor", "middle")
-                    .text(function(d) {
-                        return d.key;
-                    })
-                    .attr('fill-opacity', 1);
-
-                                    // add the X Axis
-                second_wrapper.append("g").attr('class', 'x axis')
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%Y")));
-
-                // add the Y Axis
-                second_wrapper.append("g").attr('class', 'y axis')
-                    .call(d3.axisLeft(y).ticks(4));
+                draw3rdChart();
             });
         }
 
@@ -534,6 +498,7 @@
       // } 
       
       saveVariables();
+      drawMainChart();
 });
 
 
@@ -549,10 +514,7 @@
 
         function drawAllChart(){
             // $('#chart1 svg').remove();
-            drawfirstChart();
-            draw2ndChart();
-            draw3rdChart();
-            drawMainChart();  
+            drawfirstChart();            
         }
         function show2ndchart() {       
             $('.first_chart_path').remove();
@@ -854,8 +816,9 @@
                 main_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(4));
 
-                main_wrapper.append('g').attr('class','first_chart_path').data([zData]).append('path').attr("d",valueline)
-                .transition().duration(2000).attr("d",first_path);
+                    console.log([zData]);
+                    console.log(first_path);
+                main_wrapper.append('g').attr('class','first_chart_path').data([zData]).append('path').attr("d",valueline).transition().duration(2000).attr("d",first_path);
             });
         }
     </script>
