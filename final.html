@@ -66,7 +66,7 @@
         display: none;
     }
 
-    .second_wrapper,.third_wrapper,.first_wrapper{
+    .second_wrapper,.first_wrapper{
         display: none;
     }
     .first_chart_path path{
@@ -332,25 +332,6 @@
                         return color(d.key);
                     })
                     .attr('d',area)
-                    // .transition()
-                    // .delay(function(d, i) {
-                    //     return i * 1000;
-                    // })
-                    // .duration(1000)
-                    // .attrTween('d', function(d, i) {                        
-                    //     var ba = [];
-                    //     for (var j = 0; j < d.length; j++) {
-                    //         var tmp_a = {};
-                    //         tmp_a[0] = d[j][0];
-                    //         tmp_a[1] = d[j][1];
-                    //         tmp_a['date'] = d[j]['data']['date'];
-                    //         ba.push(tmp_a);
-                    //     }
-                    //     var interpolator = d3.interpolate(zeroArray[i], ba);
-                    //     return function(t) {
-                    //         return area1(interpolator(t));
-                    //     }
-                    // })
 
                 browser.append('text')
                     .datum(function(d) {
@@ -573,6 +554,9 @@
         function show2ndchart() {       
             $('.first_chart_path').remove();
             if($("#show1stchart").hasClass('hide')){
+            $('.third_wrapper .axis').css('display','none');
+            $('.main_wrapper .axis').css('display','block');
+
             svg.selectAll('.browser_0').style('display','');
             svg.selectAll('.browser_1').style('display','');
             svg.selectAll('.browser_2').style('display','');
@@ -594,9 +578,10 @@
         }
 
         function show3rdchart() {      
-            $("#show1stchart").addClass('hide');
-            svg.select('x.axis').transition();
+            $("#show1stchart").addClass('hide');            
 
+            $('.third_wrapper .axis').css('display','block');
+            $('.main_wrapper .axis').css('display','none');
             svg.selectAll('.browser_0').style('display','');
             svg.selectAll('.browser_1').style('display','');
             svg.selectAll('.browser_2').style('display','');
@@ -615,6 +600,8 @@
 
             svg.selectAll('.browser_3').transition().attr('transform',g_wrap_3_tran).duration(2000);            
             svg.selectAll('.browser_3 path').transition().attr("d",g_wrap_3_path).duration(2000);
+
+
         }
 
         function show1stchart() {   
@@ -641,12 +628,6 @@
 
             first_path = d3.select('.first_wrapper path').attr('d');
         }
-        // function transition2ndChart(){
-
-        // }
-        // function transition3rdChart(){
-
-        // }
 
         function drawMainSecChart(){
             var data = [];              
