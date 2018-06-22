@@ -114,7 +114,7 @@
         var svg = d3.select("#chart1").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .append("g")
+            .append("g").attr('class','svg_wrapper')
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         // set the ranges
@@ -540,17 +540,20 @@
 
         }
         $(function() {
+            drawAllChart();
+            $('#city_selector').change(function() {
+                $("#chart1 svg .svg_wrapper").empty();
+                drawAllChart();
+            })
+        })
+
+        function drawAllChart(){
+            // $('#chart1 svg').remove();
             drawfirstChart();
             draw2ndChart();
             draw3rdChart();
-            drawMainChart();
-            // saveVariables();
-            // $('#city_selector').change(function() {
-            //     $("#chart1").empty();
-            //     drawfirstChart();
-            // })
-        })
-
+            drawMainChart();  
+        }
         function show2ndchart() {       
             $('.first_chart_path').remove();
             if($("#show1stchart").hasClass('hide')){
