@@ -52,7 +52,7 @@
         margin-left: 10px;
     }
 
-    .first_wrapper, .third_wrapper{
+    .first_wrapper,.third_wrapper{
         display: none;
     }
 </style>
@@ -73,9 +73,7 @@
         <a href="#" id="show3rdchart" onClick="show3rdchart();"> Show Seperate </a>
     </div>
 
-    <div id="chart1"></div>
-    <div id="chart2"></div>
-    <div id="chart3"></div>
+    <div id="chart1"></div>    
     <!-- load the d3.js library -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -83,6 +81,7 @@
     var browser_0_path, browser_1_path,browser_2_path,browser_3_path;
     var g_wrap_0_path, g_wrap_1_path,g_wrap_2_path,g_wrap_3_path;
     var g_wrap_0_tran, g_wrap_1_tran,g_wrap_2_tran,g_wrap_3_tran;
+    var first_path;
       // set the dimensions and margins of the graph
       var margin = {top: 20,right: 20,bottom: 30,left: 50},
         width = 960 - margin.left - margin.right,
@@ -216,12 +215,11 @@
                     .call(d3.axisLeft(y).ticks(4));
 
             });
-            console.log('1st');
+            
         }
 
         function draw2ndChart() {
-            var data = [];
-            var tsvData = null;        
+            var data = [];              
 
             var x = d3.scaleTime().range([0, width]).nice();
             
@@ -265,10 +263,6 @@
                 data.forEach(function(d) {
                     d.date = Date.parse(d.date);
                 });
-                tsvData = (function() {
-                    return data;
-                })();
-
 
                 var maxDateVal = d3.max(data, function(d) {
                     var vals = d3.keys(d).map(function(key) {
@@ -353,6 +347,15 @@
                         return d.key;
                     })
                     .attr('fill-opacity', 1);
+
+                                    // add the X Axis
+                second_wrapper.append("g").attr('class', 'x axis')
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%Y")));
+
+                // add the Y Axis
+                second_wrapper.append("g").attr('class', 'y axis')
+                    .call(d3.axisLeft(y).ticks(4));
             });
         }
 
@@ -682,8 +685,7 @@
         return tmp_y;
       }).attr('text-anchor','middle').attr('fill','white');
       // } 
-
-      console.log('3rd');    
+      
       saveVariables();
 });
 
@@ -701,8 +703,12 @@
             // })
         })
 
-        function show2ndchart() {            
-            console.log(browser_0_path)
+        function show2ndchart() {                        
+            svg.select('.browser_0').style('display','');
+            svg.select('.browser_1').style('display','');
+            svg.select('.browser_2').style('display','');
+            svg.select('.browser_3').style('display','');
+
             svg.select('.browser_0').transition().attr("transform","").duration(2000);
             svg.select('.browser_1').transition().attr("transform","").duration(2000);
             svg.select('.browser_2').transition().attr("transform","").duration(2000);
@@ -713,7 +719,14 @@
             svg.select('.browser_3 path').transition().attr("d",browser_3_path).duration(2000);
         }
 
-        function show3rdchart() {            
+        function show3rdchart() {      
+            svg.select('x.axis').transition();
+                 
+            svg.select('.browser_0').style('display','');
+            svg.select('.browser_1').style('display','');
+            svg.select('.browser_2').style('display','');
+            svg.select('.browser_3').style('display','');
+
             svg.selectAll('.browser text').remove();                    
             
             svg.select('.browser_0').transition().attr('transform',g_wrap_0_tran).duration(2000);            
@@ -727,29 +740,16 @@
 
             svg.select('.browser_3').transition().attr('transform',g_wrap_3_tran).duration(2000);            
             svg.select('.browser_3 path').transition().attr("d",g_wrap_3_path).duration(2000);
-            // var path_d = d3.select('.g_wrap_1 path').attr('d');
-            // trans_d = d3.select('.g_wrap_1').attr('transform');
-
-            // svg.select('.browser_1').transition().attr('transform',trans_d).duration(2000);
-            // svg.select('.browser_1 path').transition().attr("d",path_d).duration(2000);
-
-            // var path_d = d3.select('.g_wrap_2 path').attr('d');
-            // trans_d = d3.select('.g_wrap_2').attr('transform');
-            // svg.select('.browser_2').transition().attr('transform',trans_d).duration(2000);
-            // svg.select('.browser_2 path').transition().attr("d",path_d).duration(2000);
-
-            // var path_d = d3.select('.g_wrap_3 path').attr('d');
-            // trans_d = d3.select('.g_wrap_3').attr('transform');
-            // svg.select('.browser_3').transition().attr('transform',trans_d).duration(2000);
-            // svg.select('.browser_3 path').transition().attr("d",path_d).duration(2000);
         }
 
         function show1stchart() {                        
-            // transition1stChart();            
+            svg.select('.browser_0 path').transition().attr("d",first_path).duration(2000);
+            svg.select('.browser_1').style('display','none');
+            svg.select('.browser_2').style('display','none');
+            svg.select('.browser_3').style('display','none');
         }
 
-        function saveVariables(){      
-        console.log('saveVariables');
+        function saveVariables(){              
             g_wrap_0_path = d3.select('.g_wrap_0 path').attr('d');
             g_wrap_1_path = d3.select('.g_wrap_1 path').attr('d');
             g_wrap_2_path = d3.select('.g_wrap_2 path').attr('d');
@@ -759,12 +759,13 @@
             g_wrap_1_tran = d3.select('.g_wrap_1').attr('transform');
             g_wrap_2_tran = d3.select('.g_wrap_2').attr('transform');
             g_wrap_3_tran = d3.select('.g_wrap_3').attr('transform');
-
-            console.log(d3.select('.browser_0 path').attr('d'));
+            
             browser_0_path = d3.select('.browser_0 path').attr('d');
             browser_1_path = d3.select('.browser_1 path').attr('d');
             browser_2_path = d3.select('.browser_2 path').attr('d');
             browser_3_path = d3.select('.browser_3 path').attr('d');
+
+            first_path = d3.select('.first_wrapper path').attr('d');
         }
         // function transition2ndChart(){
 
