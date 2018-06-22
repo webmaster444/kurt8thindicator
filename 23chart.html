@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.line {
+  fill: none;  
+  stroke-width: 2px;
+}
+
+#city_selector_wrapper, #type_selector_wrapper{
+  display: inline-block;
+  margin: 30px;
+}
+select{
+  padding: 10px 8px;
+  border-radius: 3px;
+  margin-left: 15px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: none;
+  shape-rendering: crispEdges;
+}
+
+/*.g_wra_2 .y.axis text,.g_wra_1 .y.axis text,.g_wra_3 .y.axis text{
+  display: none;
+}*/
+.g_wra_0{
+  display: block;
+}
+</style>
+<body>
+<div id="city_selector_wrapper">
+  <label> Select City </label>
+  <select id="city_selector">
+    <option select value="De-Panne">De Panne</option>
+    <option value="Koksijde">Koksijde</option>
+    <option value="Nieuwpoort">Nieuwpoort</option>
+    <option value="Veurne">Veurne</option>
+  </select>
+  <a href="#" onclick="show3rdChart()">Show 3rd Chart</a>
+</div>
+<div id="chart1"></div>
+
+<!-- load the d3.js library -->     
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  crossorigin="anonymous"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
+var z = d3.scaleOrdinal().range(color);
+
+// append the svg obgect to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("#chart1").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+function drawChart(){
+// set the ranges
+var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.2);
+var x = d3.scaleTime().nice();
+
+var y = d3.scaleLinear().range([height, 0]).nice();
+
+// define the area
+var area = d3.area()    
+    .x(function(d) {return x(Date.parse(d.key)); })
+    .y0(height)
+    .y1(function(d) { return y(d.value); });
+
+// define the line
+var valueline = d3.line()
+    .x(function(d) {return x(Date.parse(d.key)); })
+    .y(function(d) {return y(d.value); });    
+
+
+// get the data
+// d3.csv("data.csv", function(error, data) {
+var jsonfileName = jQuery("#city_selector").val();
+jsonfileName += "2.json";
+d3.json(jsonfileName, function(jsondata) {
+  var keysArray = Object.keys(jsondata);
+
+  var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
+      key,
+      value
+  }));
+  jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
+      key,
+      value
+  }));
+
+  jsondataArray.forEach(function(d) {
+      d.close = +d3.max(Object.values(d.value.value));
+  });
+
+  y.domain([0, d3.max(jsondataArray, function(d) {
+      return d.close;
+  })]).nice();
+
+  x1.domain(keysArray).padding(0.2);    
+  data = Object.entries(jsondata).map(([key, value]) => ({key,value}));   
+  
+  // format the data
+  data.forEach(function(d) {
+      d.date = Date.parse(d.key);
+      d.close = +d.value;
+  });
+
+  var zeroData = [];
+  data.forEach(function(d){
+    var tmpzero = {};
+    tmpzero['date'] = Date.parse(d.key);
+    tmpzero['close'] = 0;
+    zeroData.push(tmpzero);
+  })  
+  
+  // scale the range of the data
+  var dateArray = Object.keys(data[0]['value']);
+  var newre = [];
+  dateArray.forEach(function(d,i,dateArray){
+    dateArray = Date.parse(d);    
+  })
+  
+  x.domain(d3.extent(dateArray,function(d){return Date.parse(d)})).rangeRound([0, x1.bandwidth()]);  
+    
+  var g = svg.append('g');
+  
+  var g_wrapper = g.selectAll('g')
+  .data(data).enter()
+  .append('g').attr('class',function(d,i){
+    return 'g_wrapper '+ "g_wrap_"+i;
+  })
+  .attr('transform',function(d,i){return "translate(" + x1(d['key']) + ',0)'});
+
+  g_wrapper.selectAll('path')
+  .data(function(d) {
+    var tmp = [];
+    tmp = d.value;    
+    tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+    return [tmp]; 
+  }).enter().append("path")
+       .attr("class", "area")       
+       .attr("d", area)
+       .attr("fill",function(d,i){
+        return z(d.key)
+       })
+      //  .transition() 
+      // .duration(1500)
+      //  .attrTween('d',function(d,i){     
+      //   var interpolator = d3.interpolate(zeroData,d)
+      //   return function(t){                
+      //     return area(interpolator(t));
+      //   }
+      // });
+      var arrayData = [];
+      data.forEach(function(d){
+        var tmp = [];
+        tmp = d.value;
+        tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));     
+        arrayData.push(tmp);
+      })
+    
+  // add the valueline path.
+  g_wrapper.selectAll('path.line')
+      .data(function(d) {
+    var tmp = [];
+    tmp = d.value;    
+    tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+    return [tmp]; 
+  }).enter().append("path")
+      .attr("class", "line")
+      .attr('stroke',function(d,i){        
+        return z(d.key);
+      })
+      .attr("d", valueline);
+
+  // // add the X Axis
+  g_wrapper.append("g").attr('class','x axis')
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
+
+  // // add the Y Axis
+  g_wrapper.append("g").attr('class','y axis')
+      .call(d3.axisLeft(y).ticks(5));
+  });
+}
+
+function drawSecChart(){
+  var data = [];  
+
+  var parseDate = d3.timeParse('%Y');
+
+  var formatSi = d3.format(".3s");
+
+  var formatNumber = d3.format(".1f");    
+
+  var x = d3.scaleTime().range([0, width]).nice();
+
+  var y = d3.scaleLinear()
+      .range([height, 0]).nice();
+
+  var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+  var xAxis = d3.axisBottom()
+      .scale(x).ticks(5);
+
+  var yAxis = d3.axisLeft()
+      .scale(y).ticks(5);    
+
+  var area = d3.area()
+      .x(function(d) {       
+        return x(d.data.date); })
+      .y0(function(d) { return y(d[0]); })
+      .y1(function(d) { return y(d[1]); });
+
+  var area1 = d3.area()
+      .x(function(d) {              
+        return x(d['date']); })
+      .y0(function(d) { return y(d[0]); })
+      .y1(function(d) { return y(d[1]); });
+
+  var stack = d3.stack()
+  var zerostack = d3.stack()
+
+  var jsonfileName = jQuery("#city_selector").val();
+  jsonfileName += ".json";
+  
+  d3.json(jsonfileName, function(error, jsondata) {
+  
+  for (var key in jsondata) {
+    var tmp_array = new Object;
+    // skip loop if the property is from prototype
+    if (!jsondata.hasOwnProperty(key)) continue;
+    tmp_array.date = key;        
+    var obj = jsondata[key];
+    for (var prop in obj) {
+        // skip loop if the property is from prototype
+        if(!obj.hasOwnProperty(prop)) continue;
+        tmp_array[prop] = obj[prop];        
+    }
+    data.push(tmp_array);
+  }
+  
+  color.domain(d3.keys(data[0]).filter(function(key) { return key !== 'date'; }));
+
+  var keys = d3.keys(data[0]).filter(function(key) { return key !== 'date'; })
+  
+  data.forEach(function(d) {
+    d.date = Date.parse(d.date); 
+  });  
+
+  var maxDateVal = d3.max(data, function(d){
+    var vals = d3.keys(d).map(function(key){ return key !== 'date' ? d[key] : 0 });
+    return d3.sum(vals);
+  });
+  
+  // Set domains for axes
+  x.domain(d3.extent(data, function(d) { return d.date; }));
+  y.domain([0, maxDateVal])
+
+  stack.keys(keys);  
+  stack.order(d3.stackOrderNone);
+  stack.offset(d3.stackOffsetNone);
+  
+  zerostack.keys(keys);
+  zerostack.order(d3.stackOrderNone);
+  zerostack.offset(d3.stackOffsetNone);  
+  var zeroArray = [];
+  for(var i=0;i<zerostack(data).length;i++){    
+    var zerosub = [];
+    for(var j=0;j<zerostack(data)[i].length;j++){
+      var tmp_a = {};
+      tmp_a[0] = zerostack(data)[i][j][0];
+      tmp_a[1] = zerostack(data)[i][j][0];      
+      tmp_a['date'] = zerostack(data)[i][j]['data']['date'];
+      zerosub.push(tmp_a);
+    }
+    zeroArray.push(zerosub);
+  }
+    
+  var zerostackdata=[];
+  var browser = svg.selectAll('.browser')
+      .data(stack(data))
+    .enter().append('g')
+      .attr('class', function(d){ return 'browser ' + d.key; })
+      .attr('fill-opacity', 0.5);
+
+  browser.append('path')
+        .attr('class', 'area')
+        // .attr('d', area)      
+        .style('fill', function(d) { return color(d.key); })
+        .transition() 
+        .delay(function(d,i){
+          return i* 1000;
+        })
+        .duration(1000)
+        .attrTween('d',function(d,i){     
+        console.log(i);        
+        var ba=[];
+        for(var j=0;j<d.length;j++){
+          var tmp_a = {};
+          tmp_a[0] = d[j][0];
+          tmp_a[1] = d[j][1];
+          tmp_a['date'] = d[j]['data']['date'];
+          ba.push(tmp_a);
+        }        
+        var interpolator = d3.interpolate(zeroArray[i],ba);              
+        return function(t){                
+          return area1(interpolator(t));
+        }
+      });
+      
+  svg.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(xAxis);
+
+  svg.append('g')
+      .attr('class', 'y axis')
+      .call(yAxis);   
+  });
+}
+$(function(){
+  // drawChart();
+  drawSecChart();
+  $('#city_selector').change(function(){
+    $("#chart1").empty();
+    // drawChart();
+  }) 
+})
+
+function show3rdChart(){
+  console.log(svg.selectAll('.browser path'));
+  // svg.selectAll('.browser path.area').transition().attr('transform',"translate(50)");
+  svg.selectAll('.browser path.area').transition().attr("d","M0,13.821428571428555L23,12.85714285714289L46,15.75L54,16.392857142857167L61,19.285714285714278L69,20.25L77,21.85714285714289L85,18.642857142857167L92,18.321428571428555L100,19.60714285714289L108,17.678571428571388L115,16.714285714285722L123,13.821428571428555L131,12.214285714285722L138,11.571428571428555L146,10.285714285714334L154,9L161,10.285714285714334L169,8.678571428571388L169,450L161,450L154,450L146,450L138,450L131,450L123,450L115,450L108,450L100,450L92,450L85,450L77,450L69,450L61,450L54,450L46,450L23,450L0,450Z").duration(2000);
+//   svg.selectAll('path.area').exit().transition().attr('d',"").remove();
+// // set the ranges
+// var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.2);
+// var x = d3.scaleTime().nice();
+
+// var y = d3.scaleLinear().range([height, 0]).nice();
+
+// // define the area
+// var area = d3.area()    
+//     .x(function(d) {return x(Date.parse(d.key)); })
+//     .y0(height)
+//     .y1(function(d) { return y(d.value); });
+
+// // define the line
+// var valueline = d3.line()
+//     .x(function(d) {return x(Date.parse(d.key)); })
+//     .y(function(d) {return y(d.value); });    
+
+
+// // get the data
+// // d3.csv("data.csv", function(error, data) {
+// var jsonfileName = jQuery("#city_selector").val();
+// jsonfileName += "2.json";
+// d3.json(jsonfileName, function(jsondata) {
+//   var keysArray = Object.keys(jsondata);
+
+//   var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
+//       key,
+//       value
+//   }));
+//   jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
+//       key,
+//       value
+//   }));
+
+//   jsondataArray.forEach(function(d) {
+//       d.close = +d3.max(Object.values(d.value.value));
+//   });
+
+//   y.domain([0, d3.max(jsondataArray, function(d) {
+//       return d.close;
+//   })]).nice();
+
+//   x1.domain(keysArray).padding(0.2);    
+//   data = Object.entries(jsondata).map(([key, value]) => ({key,value}));   
+  
+//   // format the data
+//   data.forEach(function(d) {
+//       d.date = Date.parse(d.key);
+//       d.close = +d.value;
+//   });
+
+//   var zeroData = [];
+//   data.forEach(function(d){
+//     var tmpzero = {};
+//     tmpzero['date'] = Date.parse(d.key);
+//     tmpzero['close'] = 0;
+//     zeroData.push(tmpzero);
+//   })  
+  
+//   // scale the range of the data
+//   var dateArray = Object.keys(data[0]['value']);
+//   var newre = [];
+//   dateArray.forEach(function(d,i,dateArray){
+//     dateArray = Date.parse(d);    
+//   })
+  
+//   x.domain(d3.extent(dateArray,function(d){return Date.parse(d)})).rangeRound([0, x1.bandwidth()]);  
+    
+//   var g = svg.append('g');
+  
+//   var g_wrapper = g.selectAll('g')
+//   .data(data).enter()
+//   .append('g').attr('class',function(d,i){
+//     return 'g_wrapper '+ "g_wrap_"+i;
+//   })
+//   .attr('transform',function(d,i){return "translate(" + x1(d['key']) + ',0)'});
+
+//   g_wrapper.selectAll('path')
+//   .data(function(d) {
+//     var tmp = [];
+//     tmp = d.value;    
+//     tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+//     return [tmp]; 
+//   }).enter().append("path")
+//        .attr("class", "area")       
+//        .attr("d", area)
+//        .attr("fill",function(d,i){
+//         return z(d.key)
+//        })
+
+//       var arrayData = [];
+//       data.forEach(function(d){
+//         var tmp = [];
+//         tmp = d.value;
+//         tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));     
+//         arrayData.push(tmp);
+//       })
+    
+//   // add the valueline path.
+//   g_wrapper.selectAll('path.line')
+//       .data(function(d) {
+//     var tmp = [];
+//     tmp = d.value;    
+//     tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+//     return [tmp]; 
+//   }).enter().append("path")
+//       .attr("class", "line")
+//       .attr('stroke',function(d,i){        
+//         return z(d.key);
+//       })
+//       .attr("d", valueline);
+
+//   // // add the X Axis
+//   g_wrapper.select(".x.axis")
+//       .attr("transform", "translate(0," + height + ")")
+//       .transition()
+//       .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
+
+//   // // add the Y Axis
+//   g_wrapper.append("g").attr('class','y axis')
+//       .call(d3.axisLeft(y).ticks(5));
+//   });
+}
+</script>
+</body>

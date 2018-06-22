@@ -46,33 +46,33 @@ select{
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
-var color = d3.scaleOrdinal(d3.schemeCategory20c);
-
+var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
+var z = d3.scaleOrdinal().range(color)
 function drawChart(){
 // set the dimensions and margins of the graph
 var margin = {top: 80, right: 20, bottom: 30, left: 50},
-    width = 1500 - margin.left - margin.right,
+    width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 // parse the date / time
 var parseTime = d3.timeParse("%d-%b-%y");
 
 // set the ranges
-var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.1);
+var x1 = d3.scaleBand().rangeRound([0, width]).paddingInner(0.2);
 var x = d3.scaleTime().nice();
 
 var y = d3.scaleLinear().range([height, 0]).nice();
 
 // define the area
 var area = d3.area()    
-    .x(function(d) { console.log(x(Date.parse(d.key)));return x(Date.parse(d.key)); })
+    .x(function(d) {return x(Date.parse(d.key)); })
     .y0(height)
     .y1(function(d) { return y(d.value); });
 
 // define the line
 var valueline = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });    
+    .x(function(d) {return x(Date.parse(d.key)); })
+    .y(function(d) {return y(d.value); });    
 
 
 // append the svg obgect to the body of the page
@@ -91,37 +91,57 @@ var jsonfileName = jQuery("#city_selector").val();
 jsonfileName += "2.json";
 d3.json(jsonfileName, function(jsondata) {
   var keysArray = Object.keys(jsondata);
-  var dataArray = [];
-  var dataArray1,dataArray2,dataArray3,dataArray0;
-  x1.domain(keysArray).padding(0.1);
-  // for(var i=0;i<keysArray.length;i++){    
-    // console.log(jsondata);
-//     var tmpKey = keysArray[i];    
-//     var data = jsondata[tmpKey];
-    
+
+  var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
+      key,
+      value
+  }));
+  jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
+      key,
+      value
+  }));
+
+  jsondataArray.forEach(function(d) {
+      d.close = +d3.max(Object.values(d.value.value));
+  });
+
+  y.domain([0, d3.max(jsondataArray, function(d) {
+      return d.close;
+  })]).nice();
+
+  x1.domain(keysArray).padding(0.2);    
   data = Object.entries(jsondata).map(([key, value]) => ({key,value}));   
   
-//   // format the data
+  // format the data
   data.forEach(function(d) {
       d.date = Date.parse(d.key);
       d.close = +d.value;
   });
 
-var zeroData = [];
+  var zeroData = [];
   data.forEach(function(d){
     var tmpzero = {};
     tmpzero['date'] = Date.parse(d.key);
     tmpzero['close'] = 0;
     zeroData.push(tmpzero);
   })  
+  
   // scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.date; })).nice();  
-  y.domain([0, d3.max(data, function(d) { return d.close; })]).nice();
-var g = svg.append('g');
+  var dateArray = Object.keys(data[0]['value']);
+  var newre = [];
+  dateArray.forEach(function(d,i,dateArray){
+    dateArray = Date.parse(d);    
+  })
+  
+  x.domain(d3.extent(dateArray,function(d){return Date.parse(d)})).rangeRound([0, x1.bandwidth()]);  
+    
+  var g = svg.append('g');
   
   var g_wrapper = g.selectAll('g')
   .data(data).enter()
-  .append('g').attr('class','g_wrapper')
+  .append('g').attr('class',function(d,i){
+    return 'g_wrapper '+ "g_wrap_"+i;
+  })
   .attr('transform',function(d,i){return "translate(" + x1(d['key']) + ',0)'});
 
   g_wrapper.selectAll('path')
@@ -130,44 +150,88 @@ var g = svg.append('g');
     tmp = d.value;    
     tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
     return [tmp]; 
-
   }).enter().append("path")
-       .attr("class", "area")
-       // .attr('fill',color(4*i+1))
+       .attr("class", "area")       
        .attr("d", area)
-       .transition() 
-      .duration(1500)
-       .attrTween('d',function(d,i){     
-        var interpolator = d3.interpolate(zeroData,d)
-        return function(t){                
-          return area(interpolator(t));
-        }
-      });
-
-  // // add the valueline path.
-  // g_wrapper.append("path")
-  //     .data([data])
-  //     .attr("class", "line")
-  //     .attr('stroke',color(4*i+3))
-  //     .attr("d", valueline);
+       .attr("fill",function(d,i){
+        return z(d.key)
+       })
+      //  .transition() 
+      // .duration(1500)
+      //  .attrTween('d',function(d,i){     
+      //   var interpolator = d3.interpolate(zeroData,d)
+      //   return function(t){                
+      //     return area(interpolator(t));
+      //   }
+      // });
+      var arrayData = [];
+      data.forEach(function(d){
+        var tmp = [];
+        tmp = d.value;
+        tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));     
+        arrayData.push(tmp);
+      })
+    
+  // add the valueline path.
+  g_wrapper.selectAll('path.line')
+      .data(function(d) {
+    var tmp = [];
+    tmp = d.value;    
+    tmp = Object.entries(tmp).map(([key, value]) => ({key,value}));           
+    return [tmp]; 
+  }).enter().append("path")
+      .attr("class", "line")
+      .attr('stroke',function(d,i){        
+        return z(d.key);
+      })
+      .attr("d", valueline);
 
   // // add the X Axis
-  // g_wrapper.append("g").attr('class','x axis')
-  //     .attr("transform", "translate(0," + height + ")")
-  //     .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
+  g_wrapper.append("g").attr('class','x axis')
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat("%Y")));
 
   // // add the Y Axis
-  // g_wrapper.append("g").attr('class','y axis')
-  //     .call(d3.axisLeft(y).ticks(5));
+  g_wrapper.append("g").attr('class','y axis')
+      .call(d3.axisLeft(y).ticks(5));
 
   // g_wrapper.append("text").attr('x',0).attr('y',-70).attr('dy','.3em').text(tmpKey); 
+  var g_indi_start = g_wrapper.append('g').attr('class','indicator_start');
+  g_indi_start.append('rect')
+  .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))) - 20)})
+  .attr('y',function(d,i){
+    var tmp_key = d3.min(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return (y(tmp_y)-15)})
+  .attr('width',40).attr('height',30);
 
-  // var g_indi_start = g_wrapper.append('g').attr('class','indicator_start');
-  // g_indi_start.append('rect').attr('x',(x(data[0].date) - 20)).attr('y',(y(data[0].close)-15)).attr('width',40).attr('height',30).attr('fill',color(4*i+3));
-  // g_indi_start.append('text').attr('x',(x(data[0].date))).attr('y',(y(data[0].close))).attr('dy','.3em').text(data[0].close).attr('text-anchor','middle').attr('fill','white');
-  // var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
-  // g_indi_end.append('rect').attr('x',(x(data[data.length-1].date) - 20)).attr('y',(y(data[data.length-1].close)-15)).attr('width',40).attr('height',30).attr('fill',color(4*i+3));
-  // g_indi_end.append('text').attr('x',(x(data[data.length-1].date))).attr('y',(y(data[data.length-1].close))).attr('dy','.3em').text(data[data.length-1].close).attr('text-anchor','middle').attr('fill','white');
+  g_indi_start.append('text')
+  .attr('x',function(d,index){return (x(Date.parse(d3.min(Object.keys(d.value)))))})
+  .attr('y',function(d,i){
+    var tmp_key = d3.min(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return (y(tmp_y))})
+  .attr('dy','.3em').text(function(d){
+        var tmp_key = d3.min(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return tmp_y;
+  }).attr('text-anchor','middle').attr('fill','white');
+
+  var g_indi_end = g_wrapper.append('g').attr('class','indicator_end');
+  g_indi_end.append('rect').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value))))-20)})
+  .attr('y',function(d,i){
+    var tmp_key = d3.max(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return (y(tmp_y)-15)}).attr('width',40).attr('height',30)
+  g_indi_end.append('text').attr('x',function(d){return (x(Date.parse(d3.max(Object.keys(d.value)))))})
+  .attr('y',function(d,i){
+    var tmp_key = d3.max(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return (y(tmp_y))}).attr('dy','.3em').text(function(d){
+        var tmp_key = d3.max(Object.keys(d.value));    
+    var tmp_y = d['value'][tmp_key];
+    return tmp_y;
+  }).attr('text-anchor','middle').attr('fill','white');
   // } 
 });
 
