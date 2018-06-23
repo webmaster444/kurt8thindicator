@@ -551,6 +551,8 @@
             drawfirstChart();
             $('#city_selector').change(function() {
                 $("#chart1 svg .svg_wrapper").empty();
+                $("#show1stchart").removeClass('hide');
+                $("#show3rdchart").addClass('hide');
                 drawfirstChart();
             })
         })
