@@ -558,8 +558,7 @@
         })
 
         //triggers when button "Show Types" clicked
-        function show2ndchart() {
-            $('.first_chart_path').remove();
+        function show2ndchart() {            
             if ($("#show1stchart").hasClass('hide')) {
                 $('.third_wrapper .axis').css('display', 'none');
                 $('.main_wrapper .axis').css('display', 'block');
@@ -586,6 +585,8 @@
 
         //triggers when button "Show Seperate" clicked
         function show3rdchart() {
+
+            $('.first_chart_path').remove();
             $("#show1stchart").addClass('hide');
 
             $('.third_wrapper .axis').css('display', 'block');
@@ -612,8 +613,9 @@
 
         //triggers when button "Show Total" clicked
         function show1stchart() {
+            // $('.first_chart_path').remove();
             $("#show3rdchart").addClass('hide');
-            svg.selectAll('.main_wrapper .browser').remove();
+            // svg.selectAll('.main_wrapper .browser').remove();
             drawMainChart();
         }
 
@@ -751,8 +753,12 @@
                         return function(t) {
                             return area1(interpolator(t));
                         }
+                    }).on('end',function(d,i){
+                        if(i==3){
+                            // $('.first_chart_path').remove();
+                        }                        
                     })
-            });
+            });        
         }
 
         function drawMainChart() {
