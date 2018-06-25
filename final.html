@@ -2,7 +2,9 @@
 <meta charset="utf-8">
 <style>
     /* set the CSS */
-
+    .main_wrapper .line{
+        stroke: steelblue;
+    }
     .line {
         fill: none;
         stroke-width: 2px;
@@ -43,6 +45,12 @@
         display: none;
     }
 
+text.first_label{
+  font-size: 17px;
+    fill: steelblue;
+    font-weight: bold;
+    font-family: sans-serif;
+}
 #buttons_wrapper a.active{
     background: #6a7d06;
     color: white;
@@ -121,13 +129,13 @@
         var zData = [];
         // set the dimensions and margins of the graph
         var margin = {
-                top: 20,
-                right: 20,
+                top: 50,
+                right: 100,
                 bottom: 30,
-                left: 50
+                left: 100
             },
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+            width = 1300 - margin.left - margin.right,
+            height = 600 - margin.top - margin.bottom;
 
         var y = d3.scaleLinear().range([height, 0]).nice();
 
@@ -595,6 +603,8 @@
         function show3rdchart() {
 
             $('.first_chart_path').remove();
+            $('.main_wrapper .line').remove();
+            $('.main_wrapper .first_label').remove();
             $("#show1stchart").addClass('hide');
 
             $('.third_wrapper .axis').css('display', 'block');
@@ -783,71 +793,37 @@
             var yAxis = d3.axisLeft()
                 .scale(y).ticks(5);
 
-            var stack = d3.stack()
-            var zerostack = d3.stack()
-
             var jsonfileName = jQuery("#city_selector").val();
             jsonfileName += ".json";
-            d3.json(jsonfileName, function(error, jsondata) {
-                // d3.json('De-Panne.json', function(error, jsondata) {
-                for (var key in jsondata) {
-                    var tmp_array = new Object;
-                    // skip loop if the property is from prototype
-                    if (!jsondata.hasOwnProperty(key)) continue;
-                    tmp_array.date = key;
-                    var obj = jsondata[key];
-                    for (var prop in obj) {
-                        // skip loop if the property is from prototype
-                        if (!obj.hasOwnProperty(prop)) continue;
-                        tmp_array[prop] = obj[prop];
-                    }
-                    data.push(tmp_array);
+            d3.json(jsonfileName, function(data) {
+                var keysArray = Object.keys(data);
+                var newdata = [];
+                var newzerodata = [];
+                for (var i = 0; i < keysArray.length; i++) {
+                    var tmpData = {};
+                    tmpData['key'] = keysArray[i];
+                    tmpData['value'] = d3.sum(Object.values(data[keysArray[i]]));
+                    newdata.push(tmpData);
+
+                    var zeroData = {};
+                    zeroData['date'] = Date.parse(keysArray[i]);
+                    zeroData['close'] = 0;
+                    newzerodata.push(zeroData);
                 }
 
-                color.domain(d3.keys(data[0]).filter(function(key) {
-                    return key !== 'date';
-                }));
-
-                var keys = d3.keys(data[0]).filter(function(key) {
-                    return key !== 'date';
-                })
-                data.forEach(function(d) {
-                    d.date = Date.parse(d.date);
+                // format the data
+                newdata.forEach(function(d) {
+                    d.date = Date.parse(d.key);
+                    d.close = +d.value;
                 });
 
-                var maxDateVal = d3.max(data, function(d) {
-                    var vals = d3.keys(d).map(function(key) {
-                        return key !== 'date' ? d[key] : 0
-                    });
-                    return d3.sum(vals);
-                });
-
-                // Set domains for axes
-                x.domain(d3.extent(data, function(d) {
+                // scale the range of the data
+                x.domain(d3.extent(newdata, function(d) {
                     return d.date;
                 })).nice();
-                y.domain([0, maxDateVal]).nice();
-
-                stack.keys(keys);
-
-                stack.order(d3.stackOrderNone);
-                stack.offset(d3.stackOffsetNone);
-
-                zerostack.keys(keys);
-                zerostack.order(d3.stackOrderNone);
-                zerostack.offset(d3.stackOffsetNone);
-                var zeroArray = [];
-                for (var i = 0; i < zerostack(data).length; i++) {
-                    var zerosub = [];
-                    for (var j = 0; j < zerostack(data)[i].length; j++) {
-                        var tmp_a = {};
-                        tmp_a[0] = zerostack(data)[i][j][0];
-                        tmp_a[1] = zerostack(data)[i][j][0];
-                        tmp_a['date'] = zerostack(data)[i][j]['data']['date'];
-                        zerosub.push(tmp_a);
-                    }
-                    zeroArray.push(zerosub);
-                }
+                y.domain([0, d3.max(newdata, function(d) {
+                    return d.close;
+                })]).nice();
 
                 var main_wrapper = svg.append('g').attr('class', 'main_wrapper');
                 // add the X Axis
@@ -859,8 +835,49 @@
                 main_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(4));
 
-                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path);
+                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path);            
+
+                main_wrapper.append("path").data([newdata]).transition().delay(2000).attr("class", "line").attr("d", valueline);
+
+                main_wrapper.selectAll(".first_label").data(newdata).enter().append("text")
+                .attr('class','first_label hide').attr("dy","0.3em").attr('x',function(d){console.log(d);return x(d.date)}).attr('y',function(d){return (y(d.close) - 50 )}).text(function(d){
+                    if(d.key=="1995"){
+                        return "In 1995, there were " + d.close + " of houses in " + $("#city_selector").val();
+                    }else if(d.key == "2005"){
+                        return "In 2005, there were " + d.close + " of houses in " + $("#city_selector").val();
+                    }else if(d.key == "2017"){
+                        return "In 2017, there were " + d.close + " of houses in " + $("#city_selector").val();
+                    }
+                    return "";
+                }).attr('text-anchor','middle').call(wrap,200);    
+
+                main_wrapper.selectAll('.first_label').transition().delay(2000).attr("class","first_label");
             });
         }
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        x = text.attr('x');
+        var dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em")
+    while (word = words.pop()) {
+      line.push(word)
+      tspan.text(line.join(" "))
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop()
+        tspan.text(line.join(" "))
+        line = [word]
+        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
+      }
+    }
+  })
+}
     </script>
 </body>
