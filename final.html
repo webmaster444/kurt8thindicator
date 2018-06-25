@@ -452,7 +452,12 @@ text.first_label{
                     .attr('transform', function(d, i) {
                         return "translate(" + x1(d['key']) + ',0)'
                     });
-
+                    
+                g_wrapper.append('svg:image').attr('class','house_img hide').attr('x', function(d){return (x1.bandwidth() /2 - 40);})
+                  .attr('y', height - 100)
+                  .attr('width', 80)
+                  .attr('height', 80)
+                  .attr("xlink:href", function(d,i){i++;return "images/house"+i+".png"})
                 g_wrapper.selectAll('path')
                     .data(function(d) {
                         var tmp = [];
@@ -574,7 +579,8 @@ text.first_label{
         })
 
         //triggers when button "Show Types" clicked
-        function show2ndchart() {            
+        function show2ndchart() {          
+            $('.house_img').addClass('hide');  
             if ($("#show1stchart").hasClass('hide')) {
                 $('.third_wrapper .axis').css('display', 'none');
                 $('.main_wrapper .axis').css('display', 'block');
@@ -605,6 +611,7 @@ text.first_label{
             $('.first_chart_path').remove();
             $('.main_wrapper .line').remove();
             $('.main_wrapper .first_label').remove();
+            $('.house_img').removeClass('hide');
             $("#show1stchart").addClass('hide');
 
             $('.third_wrapper .axis').css('display', 'block');
@@ -632,6 +639,7 @@ text.first_label{
         //triggers when button "Show Total" clicked
         function show1stchart() {
             // $('.first_chart_path').remove();
+            $('.house_img').addClass('hide');  
             $("#show3rdchart").addClass('hide');
             // svg.selectAll('.main_wrapper .browser').remove();
             drawMainChart();
@@ -840,13 +848,13 @@ text.first_label{
                 main_wrapper.append("path").data([newdata]).transition().delay(2000).attr("class", "line").attr("d", valueline);
 
                 main_wrapper.selectAll(".first_label").data(newdata).enter().append("text")
-                .attr('class','first_label hide').attr("dy","0.3em").attr('x',function(d){console.log(d);return x(d.date)}).attr('y',function(d){return (y(d.close) - 50 )}).text(function(d){
+                .attr('class','first_label hide').attr("dy","0.3em").attr('x',function(d){return x(d.date)}).attr('y',function(d){return (y(d.close) - 50 )}).text(function(d){
                     if(d.key=="1995"){
-                        return "In 1995, there were " + d.close + " of houses in " + $("#city_selector").val();
+                        return "In 1995, there were " + d.close + " houses in " + $("#city_selector").val();
                     }else if(d.key == "2005"){
-                        return "In 2005, there were " + d.close + " of houses in " + $("#city_selector").val();
+                        return "In 2005, there were " + d.close + " houses in " + $("#city_selector").val();
                     }else if(d.key == "2017"){
-                        return "In 2017, there were " + d.close + " of houses in " + $("#city_selector").val();
+                        return "In 2017, there were " + d.close + " houses in " + $("#city_selector").val();
                     }
                     return "";
                 }).attr('text-anchor','middle').call(wrap,200);    
