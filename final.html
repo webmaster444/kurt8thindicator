@@ -1,101 +1,110 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-    /* set the CSS */
-    .main_wrapper .line{
-        stroke: steelblue;
-    }
-    .line {
-        fill: none;
-        stroke-width: 2px;
-    }
+  /* set the CSS */
+  .main_wrapper .line {
+      stroke: steelblue;
+  }
 
-    .first_wrapper .line {
-        stroke: steelblue;
-    }
+  .line {
+      fill: none;
+      stroke-width: 4px;
+  }
 
-    .first_wrapper .area {
-        fill: lightsteelblue;
-    }
+  .first_wrapper .line {
+      stroke: steelblue;
+  }
 
-    .axis line,
-    .axis path.domain {
-        display: none;
-    }
+  .first_wrapper .area {
+      fill: lightsteelblue;
+  }
 
-    #city_selector_wrapper,
-    #buttons_wrapper {
-        display: inline-block;
-        margin: 30px;
-    }
+  .axis line,
+  .axis path.domain {
+      display: none;
+  }
 
-    select {
-        padding: 10px 8px;
-        border-radius: 3px;
-        margin-left: 15px;
-    }
+  #city_selector_wrapper,
+  #buttons_wrapper {
+      display: inline-block;
+      margin: 30px;
+  }
 
-    .hide {
-        visibility: hidden;
-    }
+  circle.first_circle {
+      fill: steelblue;
+      stroke: white;
+      stroke-width: 2px;
+  }
 
-    .g_wra_2 .y.axis text,
-    .g_wra_1 .y.axis text,
-    .g_wra_3 .y.axis text {
-        display: none;
-    }
+  select {
+      padding: 10px 8px;
+      border-radius: 3px;
+      margin-left: 15px;
+  }
 
-text.first_label{
-  font-size: 17px;
-    fill: steelblue;
-    font-weight: bold;
-    font-family: sans-serif;
-}
-#buttons_wrapper a.active{
-    background: #6a7d06;
-    color: white;
-}
-    #buttons_wrapper a {
-        text-decoration: none;
-        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-        background: white;
-        border: 1px solid black;
-        color: black;
-        padding: 10px 15px;
-        border-radius: 4px;
-        margin-left: 10px;
-    }
+  .hide {
+      visibility: hidden;
+  }
 
-    .first_wrapper path.area,
-    .third_wrapper path.area,
-    .first_wrapper path.line,
-    .third_wrapper path.line {
-        display: none;
-    }
+  .g_wra_2 .y.axis text,
+  .g_wra_1 .y.axis text,
+  .g_wra_3 .y.axis text {
+      display: none;
+  }
 
-    .g_wrap_1 .y.axis,
-    .g_wrap_2 .y.axis,
-    .g_wrap_3 .y.axis {
-        display: none !important;
-    }
+  text.first_label {
+      font-size: 17px;
+      fill: steelblue;
+      font-weight: bold;
+      font-family: sans-serif;
+  }
 
-    .indicator_start,
-    .indicator_end {
-        display: none;
-    }
+  #buttons_wrapper a.active {
+      background: #6a7d06;
+      color: white;
+  }
 
-    .third_wrapper .axis {
-        display: none;
-    }
+  #buttons_wrapper a {
+      text-decoration: none;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+      background: white;
+      border: 1px solid black;
+      color: black;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-left: 10px;
+  }
 
-    .second_wrapper,
-    .first_wrapper {
-        display: none;
-    }
+  .first_wrapper path.area,
+  .third_wrapper path.area,
+  .first_wrapper path.line,
+  .third_wrapper path.line {
+      display: none;
+  }
 
-    .first_chart_path path {
-        fill: #98abc5;
-    }
+  .g_wrap_1 .y.axis,
+  .g_wrap_2 .y.axis,
+  .g_wrap_3 .y.axis {
+      display: none !important;
+  }
+
+  .indicator_start,
+  .indicator_end {
+      display: none;
+  }
+
+  .third_wrapper .axis {
+      display: none;
+  }
+
+  .second_wrapper,
+  .first_wrapper {
+      display: none;
+  }
+
+  .first_chart_path path {
+      fill: #98abc5;
+  }
 </style>
 
 <body>
@@ -119,7 +128,6 @@ text.first_label{
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script>
-
         //define variables
         var browser_0_path, browser_1_path, browser_2_path, browser_3_path;
         var g_wrap_0_path, g_wrap_1_path, g_wrap_2_path, g_wrap_3_path;
@@ -129,7 +137,7 @@ text.first_label{
         var zData = [];
         // set the dimensions and margins of the graph
         var margin = {
-                top: 50,
+                top: 80,
                 right: 100,
                 bottom: 30,
                 left: 100
@@ -188,7 +196,7 @@ text.first_label{
             .y(function(d) {
                 return y(d.close);
             })
-        
+
         //draw 1st chart without transition
         function drawfirstChart() {
             // get the data
@@ -252,7 +260,7 @@ text.first_label{
             });
 
         }
-        
+
         //draw 2nd chart without transition
         function draw2ndChart() {
             var data = [];
@@ -452,12 +460,17 @@ text.first_label{
                     .attr('transform', function(d, i) {
                         return "translate(" + x1(d['key']) + ',0)'
                     });
-                    
-                g_wrapper.append('svg:image').attr('class','house_img hide').attr('x', function(d){return (x1.bandwidth() /2 - 40);})
-                  .attr('y', height - 100)
-                  .attr('width', 80)
-                  .attr('height', 80)
-                  .attr("xlink:href", function(d,i){i++;return "images/house"+i+".png"})
+
+                g_wrapper.append('svg:image').attr('class', 'house_img hide').attr('x', function(d) {
+                        return (x1.bandwidth() / 2 - 40);
+                    })
+                    .attr('y', height - 100)
+                    .attr('width', 80)
+                    .attr('height', 80)
+                    .attr("xlink:href", function(d, i) {
+                        i++;
+                        return "images/house" + i + ".png"
+                    })
                 g_wrapper.selectAll('path')
                     .data(function(d) {
                         var tmp = [];
@@ -510,7 +523,7 @@ text.first_label{
                 // add the Y Axis
                 g_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(5));
-                
+
                 var g_indi_start = g_wrapper.append('g').attr('class', 'indicator_start');
                 g_indi_start.append('rect')
                     .attr('x', function(d, index) {
@@ -558,14 +571,14 @@ text.first_label{
                         var tmp_key = d3.max(Object.keys(d.value));
                         var tmp_y = d['value'][tmp_key];
                         return tmp_y;
-                    }).attr('text-anchor', 'middle').attr('fill', 'white');                
+                    }).attr('text-anchor', 'middle').attr('fill', 'white');
 
                 saveVariables();
                 drawMainChart();
             });
         }
         $(function() {
-            $("#buttons_wrapper a").on('click',function(){
+            $("#buttons_wrapper a").on('click', function() {
                 $("#buttons_wrapper a").removeClass('active');
                 $(this).addClass('active');
             })
@@ -579,8 +592,8 @@ text.first_label{
         })
 
         //triggers when button "Show Types" clicked
-        function show2ndchart() {          
-            $('.house_img').addClass('hide');  
+        function show2ndchart() {
+            $('.house_img').addClass('hide');
             if ($("#show1stchart").hasClass('hide')) {
                 $('.third_wrapper .axis').css('display', 'none');
                 $('.main_wrapper .axis').css('display', 'block');
@@ -611,6 +624,8 @@ text.first_label{
             $('.first_chart_path').remove();
             $('.main_wrapper .line').remove();
             $('.main_wrapper .first_label').remove();
+            $('.main_wrapper .first_label_line').remove();
+            $('.main_wrapper .first_circle').remove();
             $('.house_img').removeClass('hide');
             $("#show1stchart").addClass('hide');
 
@@ -639,7 +654,7 @@ text.first_label{
         //triggers when button "Show Total" clicked
         function show1stchart() {
             // $('.first_chart_path').remove();
-            $('.house_img').addClass('hide');  
+            $('.house_img').addClass('hide');
             $("#show3rdchart").addClass('hide');
             // svg.selectAll('.main_wrapper .browser').remove();
             drawMainChart();
@@ -779,12 +794,8 @@ text.first_label{
                         return function(t) {
                             return area1(interpolator(t));
                         }
-                    }).on('end',function(d,i){
-                        if(i==3){
-                            // $('.first_chart_path').remove();
-                        }                        
                     })
-            });        
+            });
         }
 
         function drawMainChart() {
@@ -843,49 +854,84 @@ text.first_label{
                 main_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(4));
 
-                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path);            
+                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path);
 
                 main_wrapper.append("path").data([newdata]).transition().delay(2000).attr("class", "line").attr("d", valueline);
 
                 main_wrapper.selectAll(".first_label").data(newdata).enter().append("text")
-                .attr('class','first_label hide').attr("dy","0.3em").attr('x',function(d){return x(d.date)}).attr('y',function(d){return (y(d.close) - 50 )}).text(function(d){
-                    if(d.key=="1995"){
-                        return "In 1995, there were " + d.close + " houses in " + $("#city_selector").val();
-                    }else if(d.key == "2005"){
-                        return "In 2005, there were " + d.close + " houses in " + $("#city_selector").val();
-                    }else if(d.key == "2017"){
-                        return "In 2017, there were " + d.close + " houses in " + $("#city_selector").val();
-                    }
-                    return "";
-                }).attr('text-anchor','middle').call(wrap,200);    
+                  .attr('class', 'first_label hide').attr("dy", "0.3em").attr('x', function(d) {
+                    return x(d.date)
+                  }).attr('y', function(d) {
+                    return (y(d.close) - 100)
+                  }).text(function(d) {
+                      if (d.key == "1995") {
+                          return "In 1995, there were " + d.close + " houses in " + $("#city_selector").val();
+                      } else if (d.key == "2005") {
+                          return "In 2005, there were " + d.close + " houses in " + $("#city_selector").val();
+                      } else if (d.key == "2017") {
+                          return "In 2017, there were " + d.close + " houses in " + $("#city_selector").val();
+                      }
+                      return "";
+                    }).attr('text-anchor', 'middle').call(wrap, 200);
 
-                main_wrapper.selectAll('.first_label').transition().delay(2000).attr("class","first_label");
+                main_wrapper.selectAll('.first_circle').data(newdata).enter().append('circle').attr('class', 'first_circle hide').attr("cx", function(d) {
+                    return x(d.date);
+                }).attr("cy", function(d) {
+                    return y(d.close)
+                }).attr('fill','steelblue').attr("r", function(d) {
+                    if (d.key == "1995" || d.key == "2005" || d.key == "2017") {
+                        return 12;
+                    }
+                    return 0;
+                })
+
+                main_wrapper.selectAll('.first_label_line').data(newdata).enter().append('line').attr('class', 'first_label_line hide').attr("x1", function(d) {
+                    if (d.key == "1995" || d.key == "2005" || d.key == "2017") {
+                        return x(d.date);
+                    }                    
+                }).attr("x2", function(d) {
+                  if (d.key == "1995" || d.key == "2005" || d.key == "2017") {
+                    return x(d.date)
+                  }
+                }).attr("y1", function(d) {
+                  if (d.key == "1995" || d.key == "2005" || d.key == "2017") {
+                    return y(d.close) - 15;
+                  }
+                }).attr("y2",function(d){
+                  if (d.key == "1995" || d.key == "2005" || d.key == "2017") {
+                    return y(d.close) - 60;
+                  }
+                }).attr('fill','steelblue').attr('stroke','steelblue');
+
+                main_wrapper.selectAll('.first_label_line').transition().delay(2000).attr("class", "first_label_line");
+                main_wrapper.selectAll('.first_circle').transition().delay(2000).attr("class", "first_circle");
+                main_wrapper.selectAll('.first_label').transition().delay(2000).attr("class", "first_label");
             });
         }
 
-function wrap(text, width) {
-  text.each(function() {
-    var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 1.1, // ems
-        y = text.attr("y"),
-        x = text.attr('x');
-        var dy = parseFloat(text.attr("dy")),
-        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em")
-    while (word = words.pop()) {
-      line.push(word)
-      tspan.text(line.join(" "))
-      if (tspan.node().getComputedTextLength() > width) {
-        line.pop()
-        tspan.text(line.join(" "))
-        line = [word]
-        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
-      }
-    }
-  })
-}
+        function wrap(text, width) {
+            text.each(function() {
+                var text = d3.select(this),
+                    words = text.text().split(/\s+/).reverse(),
+                    word,
+                    line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.1, // ems
+                    y = text.attr("y"),
+                    x = text.attr('x');
+                var dy = parseFloat(text.attr("dy")),
+                    tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em")
+                while (word = words.pop()) {
+                    line.push(word)
+                    tspan.text(line.join(" "))
+                    if (tspan.node().getComputedTextLength() > width) {
+                        line.pop()
+                        tspan.text(line.join(" "))
+                        line = [word]
+                        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
+                    }
+                }
+            })
+        }
     </script>
 </body>
