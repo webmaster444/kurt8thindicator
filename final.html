@@ -88,11 +88,6 @@
       display: none !important;
   }
 
-  .indicator_start,
-  .indicator_end {
-      display: none;
-  }
-
   .third_wrapper .axis {
       display: none;
   }
@@ -364,8 +359,9 @@
 
         //draw 3rd chart without transition
         function draw3rdChart() {
-            var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
-            var z = d3.scaleOrdinal().range(color);
+            // var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
+            var color = d3.scaleOrdinal(d3.schemeCategory20);            
+            // var z = d3.scaleOrdinal().range(color);
 
             // parse the date / time
             var parseTime = d3.timeParse("%d-%b-%y");
@@ -446,6 +442,8 @@
                     dateArray = Date.parse(d);
                 })
 
+                color.domain(keysArray);
+
                 x.domain(d3.extent(dateArray, function(d) {
                     return Date.parse(d)
                 })).rangeRound([0, x1.bandwidth()]);
@@ -484,7 +482,7 @@
                     .attr("class", "area")
                     .attr("d", area)
                     .attr("fill", function(d, i) {
-                        return z(d.key)
+                        return color(d.key)
                     })
 
                 var arrayData = [];
@@ -511,7 +509,7 @@
                     }).enter().append("path")
                     .attr("class", "line")
                     .attr('stroke', function(d, i) {
-                        return z(d.key);
+                        return color(d.key);
                     })
                     .attr("d", valueline);
 
@@ -524,7 +522,7 @@
                 g_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(5));
 
-                var g_indi_start = g_wrapper.append('g').attr('class', 'indicator_start');
+                var g_indi_start = g_wrapper.append('g').attr('class', 'indicator_start hide');
                 g_indi_start.append('rect')
                     .attr('x', function(d, index) {
                         return (x(Date.parse(d3.min(Object.keys(d.value)))) - 20)
@@ -533,7 +531,9 @@
                         var tmp_key = d3.min(Object.keys(d.value));
                         var tmp_y = d['value'][tmp_key];
                         return (y(tmp_y) - 15)
-                    })
+                    }).attr('fill',function(d,i){
+                      return color(d.key);
+                    })                    
                     .attr('width', 40).attr('height', 30);
 
                 g_indi_start.append('text')
@@ -551,7 +551,7 @@
                         return tmp_y;
                     }).attr('text-anchor', 'middle').attr('fill', 'white');
 
-                var g_indi_end = g_wrapper.append('g').attr('class', 'indicator_end');
+                var g_indi_end = g_wrapper.append('g').attr('class', 'indicator_end hide');
                 g_indi_end.append('rect').attr('x', function(d) {
                         return (x(Date.parse(d3.max(Object.keys(d.value)))) - 20)
                     })
@@ -559,6 +559,8 @@
                         var tmp_key = d3.max(Object.keys(d.value));
                         var tmp_y = d['value'][tmp_key];
                         return (y(tmp_y) - 15)
+                    }).attr('fill',function(d){
+                      return color(d.key);
                     }).attr('width', 40).attr('height', 30)
                 g_indi_end.append('text').attr('x', function(d) {
                         return (x(Date.parse(d3.max(Object.keys(d.value)))))
@@ -593,8 +595,11 @@
 
         //triggers when button "Show Types" clicked
         function show2ndchart() {
+            $('.first_house_img').remove();
             $('.house_img').addClass('hide');
             if ($("#show1stchart").hasClass('hide')) {
+                $('.indicator_start').addClass('hide');
+                $('.indicator_end').addClass('hide');
                 $('.third_wrapper .axis').css('display', 'none');
                 $('.main_wrapper .axis').css('display', 'block');
 
@@ -621,6 +626,7 @@
         //triggers when button "Show Seperate" clicked
         function show3rdchart() {
 
+            $('.first_house_img').remove();
             $('.first_chart_path').remove();
             $('.main_wrapper .line').remove();
             $('.main_wrapper .first_label').remove();
@@ -649,6 +655,9 @@
 
             svg.selectAll('.browser_3').transition().attr('transform', g_wrap_3_tran).duration(2000);
             svg.selectAll('.browser_3 path').transition().attr("d", g_wrap_3_path).duration(2000);
+
+            svg.selectAll('.indicator_start').transition().delay(2000).attr('class','indicator_start');
+            svg.selectAll('.indicator_end').transition().delay(2000).attr('class','indicator_end');
         }
 
         //triggers when button "Show Total" clicked
@@ -854,7 +863,18 @@
                 main_wrapper.append("g").attr('class', 'y axis')
                     .call(d3.axisLeft(y).ticks(4));
 
-                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path);
+                main_wrapper.append('g').attr('class', 'first_chart_path').data([zData]).append('path').attr("d", valueline).transition().duration(2000).attr("d", first_path).on('end',function(){
+
+                  main_wrapper.append('svg:image').attr('class', 'first_house_img').attr('x', function(d) {
+                        return (width / 2 - 40);
+                    })
+                    .attr('y', height - 100)
+                    .attr('width', 80)
+                    .attr('height', 80)
+                    .attr("xlink:href", function(d, i) {                        
+                        return "images/house.png";
+                    })
+                });
 
                 main_wrapper.append("path").data([newdata]).transition().delay(2000).attr("class", "line").attr("d", valueline);
 
