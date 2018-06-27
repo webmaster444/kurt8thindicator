@@ -127,7 +127,7 @@
         var browser_0_path, browser_1_path, browser_2_path, browser_3_path;
         var g_wrap_0_path, g_wrap_1_path, g_wrap_2_path, g_wrap_3_path;
         var g_wrap_0_tran, g_wrap_1_tran, g_wrap_2_tran, g_wrap_3_tran;
-        var colors = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00'];
+        var color = ['#F80018', '#FFC000', '#0B36B8', '#49E100', '#5A3B4D'];
         var first_path;
         var zData = [];
         // set the dimensions and margins of the graph
@@ -260,10 +260,7 @@
         function draw2ndChart() {
             var data = [];
 
-            var x = d3.scaleTime().range([0, width]).nice();
-
-
-            var color = d3.scaleOrdinal(d3.schemeCategory20);
+            var x = d3.scaleTime().range([0, width]).nice();    
 
             var xAxis = d3.axisBottom()
                 .scale(x).ticks(5);
@@ -290,11 +287,7 @@
                         tmp_array[prop] = obj[prop];
                     }
                     data.push(tmp_array);
-                }
-
-                color.domain(d3.keys(data[0]).filter(function(key) {
-                    return key !== 'date';
-                }));
+                }            
 
                 var keys = d3.keys(data[0]).filter(function(key) {
                     return key !== 'date';
@@ -348,8 +341,8 @@
 
                 browser.append('path')
                     .attr('class', 'area')
-                    .style('fill', function(d) {
-                        return color(d.key);
+                    .style('fill', function(d,i) {
+                        return color[i];
                     })
                     .attr('d', area)
 
@@ -359,10 +352,6 @@
 
         //draw 3rd chart without transition
         function draw3rdChart() {
-            // var color = ['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']
-            var color = d3.scaleOrdinal(d3.schemeCategory20);            
-            // var z = d3.scaleOrdinal().range(color);
-
             // parse the date / time
             var parseTime = d3.timeParse("%d-%b-%y");
 
@@ -440,9 +429,7 @@
                 var newre = [];
                 dateArray.forEach(function(d, i, dateArray) {
                     dateArray = Date.parse(d);
-                })
-
-                color.domain(keysArray);
+                })            
 
                 x.domain(d3.extent(dateArray, function(d) {
                     return Date.parse(d)
@@ -481,8 +468,8 @@
                     }).enter().append("path")
                     .attr("class", "area")
                     .attr("d", area)
-                    .attr("fill", function(d, i) {
-                        return color(d.key)
+                    .attr("fill", function(d, i) {                        
+                        return color[i];
                     })
 
                 var arrayData = [];
@@ -508,8 +495,8 @@
                         return [tmp];
                     }).enter().append("path")
                     .attr("class", "line")
-                    .attr('stroke', function(d, i) {
-                        return color(d.key);
+                    .attr('stroke', function(d, i) {                        
+                        return color[i];
                     })
                     .attr("d", valueline);
 
@@ -532,7 +519,7 @@
                         var tmp_y = d['value'][tmp_key];
                         return (y(tmp_y) - 15)
                     }).attr('fill',function(d,i){
-                      return color(d.key);
+                        return color[i];                      
                     })                    
                     .attr('width', 40).attr('height', 30);
 
@@ -559,8 +546,8 @@
                         var tmp_key = d3.max(Object.keys(d.value));
                         var tmp_y = d['value'][tmp_key];
                         return (y(tmp_y) - 15)
-                    }).attr('fill',function(d){
-                      return color(d.key);
+                    }).attr('fill',function(d,i){                      
+                      return color[i];
                     }).attr('width', 40).attr('height', 30)
                 g_indi_end.append('text').attr('x', function(d) {
                         return (x(Date.parse(d3.max(Object.keys(d.value)))))
@@ -585,13 +572,29 @@
                 $(this).addClass('active');
             })
             drawfirstChart();
-            $('#city_selector').change(function() {
+            $('#city_selector').change(function() {                        
+                $('#buttons_wrapper a').removeClass('active');
+                $('#buttons_wrapper a#show1stchart').addClass('active');
                 $("#chart1 svg .svg_wrapper").empty();
                 $("#show1stchart").removeClass('hide');
                 $("#show3rdchart").addClass('hide');
-                drawfirstChart();
+                drawfirstChart();            
             })
         })
+
+    d3.selection.prototype.moveToFront = function() {        
+      return this.each(function(){        
+        this.parentNode.appendChild(this);
+      });
+    };
+    d3.selection.prototype.moveToBack = function() {  
+        return this.each(function() { 
+            var firstChild = this.parentNode.firstChild; 
+            if (firstChild) { 
+                this.parentNode.insertBefore(this, firstChild); 
+            } 
+        });
+    };
 
         //triggers when button "Show Types" clicked
         function show2ndchart() {
@@ -635,6 +638,9 @@
             $('.house_img').removeClass('hide');
             $("#show1stchart").addClass('hide');
 
+            d3.selectAll('.indicator_start rect').moveToFront();
+            d3.selectAll('.indicator_start text').moveToFront();
+            d3.selectAll('.indicator_start').moveToFront();
             $('.third_wrapper .axis').css('display', 'block');
             $('.main_wrapper .axis').css('display', 'none');
             svg.selectAll('.browser_0').style('display', '');
@@ -693,10 +699,7 @@
         function drawMainSecChart() {
             var data = [];
 
-            var x = d3.scaleTime().range([0, width]).nice();
-
-
-            var color = d3.scaleOrdinal(d3.schemeCategory20);
+            var x = d3.scaleTime().range([0, width]).nice();    
 
             var xAxis = d3.axisBottom()
                 .scale(x).ticks(5);
@@ -723,11 +726,7 @@
                         tmp_array[prop] = obj[prop];
                     }
                     data.push(tmp_array);
-                }
-
-                color.domain(d3.keys(data[0]).filter(function(key) {
-                    return key !== 'date';
-                }));
+                }            
 
                 var keys = d3.keys(data[0]).filter(function(key) {
                     return key !== 'date';
@@ -781,10 +780,9 @@
 
                 browser.append('path')
                     .attr('class', 'area')
-                    .style('fill', function(d) {
-                        return color(d.key);
-                    })
-                    // .attr('d',area)
+                    .style('fill', function(d,i) {
+                        return color[i];                        
+                    })                    
                     .transition()
                     .delay(function(d, i) {
                         return i * 1000;
@@ -810,10 +808,7 @@
         function drawMainChart() {
             var data = [];
 
-            var x = d3.scaleTime().range([0, width]).nice();
-
-
-            var color = d3.scaleOrdinal(d3.schemeCategory20);
+            var x = d3.scaleTime().range([0, width]).nice();    
 
             var xAxis = d3.axisBottom()
                 .scale(x).ticks(5);
