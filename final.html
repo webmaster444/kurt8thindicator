@@ -394,15 +394,13 @@
                     tmp['value'] = key[1];
                     return tmp;
                 });
-
-                console.log(jsondataArray);
+                
                 jsondataArray = Object.entries(jsondataArray).map(function(key, value){
                     var tmp = new Object;
                     tmp['key'] = key[0];
                     tmp['value'] = key[1];
                     return tmp;
-                });
-                console.log(jsondataArray);
+                });                
 
                 jsondataArray.forEach(function(d) {
                     var myArray = Object.keys(d.value.value).map(function(itm) { return d.value.value[itm]; });
