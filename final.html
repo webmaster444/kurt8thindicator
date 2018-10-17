@@ -204,7 +204,8 @@
                 for (var i = 0; i < keysArray.length; i++) {
                     var tmpData = {};
                     tmpData['key'] = keysArray[i];
-                    tmpData['value'] = d3.sum(Object.values(data[keysArray[i]]));
+                    var myArr = Object.keys(data[keysArray[i]]).map(function(itm) { return data[keysArray[i]][itm]; });
+                    tmpData['value'] = d3.sum(myArr);
                     newdata.push(tmpData);
 
                     var zeroData = {};
@@ -387,17 +388,25 @@
             d3.json(jsonfileName, function(jsondata) {
                 var keysArray = Object.keys(jsondata);
 
-                var jsondataArray = Object.entries(jsondata).map(([key, value]) => ({
-                    key,
-                    value
-                }));
-                jsondataArray = Object.entries(jsondataArray).map(([key, value]) => ({
-                    key,
-                    value
-                }));
+                var jsondataArray = Object.entries(jsondata).map(function(key, value){
+                    var tmp = new Object;
+                    tmp['key'] = key[0];
+                    tmp['value'] = key[1];
+                    return tmp;
+                });
+
+                console.log(jsondataArray);
+                jsondataArray = Object.entries(jsondataArray).map(function(key, value){
+                    var tmp = new Object;
+                    tmp['key'] = key[0];
+                    tmp['value'] = key[1];
+                    return tmp;
+                });
+                console.log(jsondataArray);
 
                 jsondataArray.forEach(function(d) {
-                    d.close = +d3.max(Object.values(d.value.value));
+                    var myArray = Object.keys(d.value.value).map(function(itm) { return d.value.value[itm]; });
+                    d.close = +d3.max(myArray);
                 });
 
                 y.domain([0, d3.max(jsondataArray, function(d) {
@@ -405,10 +414,12 @@
                 })]).nice();
 
                 x1.domain(keysArray).padding(0.2);
-                data = Object.entries(jsondata).map(([key, value]) => ({
-                    key,
-                    value
-                }));
+                data = Object.entries(jsondata).map(function(key, value){
+                    var tmp = new Object;
+                    tmp['key'] = key[0];
+                    tmp['value'] = key[1];
+                    return tmp;
+                });
 
                 // format the data
                 data.forEach(function(d) {
@@ -460,10 +471,12 @@
                     .data(function(d) {
                         var tmp = [];
                         tmp = d.value;
-                        tmp = Object.entries(tmp).map(([key, value]) => ({
-                            key,
-                            value
-                        }));
+                        tmp = Object.entries(tmp).map(function(key, value){
+                            var tmp1 = new Object;
+                            tmp1['key'] = key[0];
+                            tmp1['value'] = key[1];
+                            return tmp1;
+                        });
                         return [tmp];
                     }).enter().append("path")
                     .attr("class", "area")
@@ -476,10 +489,12 @@
                 data.forEach(function(d) {
                     var tmp = [];
                     tmp = d.value;
-                    tmp = Object.entries(tmp).map(([key, value]) => ({
-                        key,
-                        value
-                    }));
+                    tmp = Object.entries(tmp).map(function(key, value){
+                        var tmp1 = new Object;
+                        tmp1['key'] = key[0];
+                        tmp1['value'] = key[1];
+                        return tmp1;
+                    });
                     arrayData.push(tmp);
                 })
 
@@ -488,10 +503,12 @@
                     .data(function(d) {
                         var tmp = [];
                         tmp = d.value;
-                        tmp = Object.entries(tmp).map(([key, value]) => ({
-                            key,
-                            value
-                        }));
+                        tmp = Object.entries(tmp).map(function(key, value){
+                            var tmp1 = new Object;
+                            tmp1['key'] = key[0];
+                            tmp1['value'] = key[1];
+                            return tmp1;
+                        });
                         return [tmp];
                     }).enter().append("path")
                     .attr("class", "line")
@@ -825,7 +842,8 @@
                 for (var i = 0; i < keysArray.length; i++) {
                     var tmpData = {};
                     tmpData['key'] = keysArray[i];
-                    tmpData['value'] = d3.sum(Object.values(data[keysArray[i]]));
+                    var myArr = Object.keys(data[keysArray[i]]).map(function(itm) { return data[keysArray[i]][itm]; });
+                    tmpData['value'] = d3.sum(myArr);
                     newdata.push(tmpData);
 
                     var zeroData = {};
@@ -943,10 +961,22 @@
                         line.pop()
                         tspan.text(line.join(" "))
                         line = [word]
-                        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", `${++lineNumber * lineHeight + dy}em`).text(word)
+                        lineNumber++;
+                        var dyV = lineNumber *lineHeight + dy;
+                        tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", dyV+'em').text(word)
                     }
                 }
             })
         }
+        if (!Object.entries)
+  Object.entries = function( obj ){
+    var ownProps = Object.keys( obj ),
+        i = ownProps.length,
+        resArray = new Array(i); // preallocate the Array
+    while (i--)
+      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+    return resArray;
+  };
     </script>
 </body>
